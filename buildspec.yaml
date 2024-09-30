@@ -1,0 +1,99 @@
+version: 0.2
+
+phases:
+  build:
+    commands:      - echo "Starting the build process..."    
+
+      # Step 1: Create the team in the organization (if it doesn't exist)
+      - echo "Creating team $TEAM_NAME in organization $ORGANIZATION..."
+      - |
+        curl -s -X POST \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{
+                "name": "'"$TEAM_NAME"'",
+                "description": "Development team for XYZ",
+                "privacy": "closed"
+              }' \
+          $GITHUB_API_URL/orgs/$ORGANIZATION/teams || true
+
+        echo "Team $TEAM_NAME processed successfully in organization $ORGANIZATION."
+
+      # Step 2: Create the repository in the organization
+      - echo "Creating repository $REPO_NAME in organization $ORGANIZATION..."
+      - |
+        curl -s -X POST \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{"name": "'"$REPO_NAME"'", "private": false}' \
+          $GITHUB_API_URL/orgs/$ORGANIZATION/repos
+
+        echo "Repository $REPO_NAME created successfully."
+
+      # Step 3: Assign write access to the team
+      - echo "Assigning write access to the team..."
+      - |
+        # URL-encode the team name
+        ENCODED_TEAM_NAME=$(echo -n "$TEAM_NAME" | jq -sRr @uri)
+
+        curl -s -X PUT \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{"permission": "push"}' \
+          $GITHUB_API_URL/orgs/$ORGANIZATION/teams/$ENCODED_TEAM_NAME/repos/$ORGANIZATION/$REPO_NAME
+
+        echo "Team $TEAM_NAME assigned write access to $REPO_NAME."
+
+      # Step 4: Create an initial commit on the 'main' branch
+      - echo "Creating initial commit on the 'main' branch..."
+      - |
+        # Create a README.md file content
+        README_CONTENT=$(echo "Welcome to $REPO_NAME" | base64)
+
+        # Create the file in the repository
+        curl -s -X PUT \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{
+                "message": "Initial commit",
+                "content": "'"$README_CONTENT"'",
+                "branch": "main",
+                "path": "README.md"
+              }' \
+          $GITHUB_API_URL/repos/$ORGANIZATION/$REPO_NAME/contents/README.md
+
+        echo "Initial commit created on 'main' branch."
+
+      # Step 5: Fetch the latest commit SHA on 'main' branch
+      - echo "Fetching SHA of the 'main' branch..."
+      - |
+        MAIN_BRANCH_SHA=$(curl -s \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          $GITHUB_API_URL/repos/$ORGANIZATION/$REPO_NAME/git/ref/heads/main \
+          | jq -r '.object.sha')
+
+        echo "SHA of 'main' branch: $MAIN_BRANCH_SHA"
+
+        if [ -z "$MAIN_BRANCH_SHA" ] || [ "$MAIN_BRANCH_SHA" = "null" ]; then
+          echo "Failed to get the SHA of the 'main' branch. Exiting..."
+          exit 1
+        fi
+
+      # Step 6: Create the 'dev' branch from 'main' branch
+      - echo "Creating 'dev' branch from 'main' branch..."
+      - |
+        curl -s -X POST \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{
+                "ref": "refs/heads/dev",
+                "sha": "'"$MAIN_BRANCH_SHA"'"
+              }' \
+          $GITHUB_API_URL/repos/$ORGANIZATION/$REPO_NAME/git/refs
+
+        echo "'dev' branch created successfully from 'main' branch."
+
+artifacts:
+  files:
+    - '**/*'
+
