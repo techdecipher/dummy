@@ -2,7 +2,8 @@ version: 0.2
 
 phases:
   build:
-    commands:      - echo "Starting the build process..."    
+    commands:
+      - echo "Starting the build process..."
 
       # Step 1: Create the team in the organization (if it doesn't exist)
       - echo "Creating team $TEAM_NAME in organization $ORGANIZATION..."
