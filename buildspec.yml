@@ -4,7 +4,7 @@ phases:
   build:
     commands:
       - echo "Downloading a file"
-      - aws s3 cp s3://bucket-name/dag/test_file.py ./test_file.py
+      - aws s3 cp s3://testairflow3poc/test_file.py ./test_file.py
       - grep -n 'task_id="run_fdl_dbjob_' test_file.py | while IFS=: read -r line_number job_string; do
           job_name=$(echo $job_string | sed 's/task_id="run_//; s/"//');
           job_id=$(curl --silent --request GET "https://<dbr_base_url>/api/2.1/jobs/list?name=$job_name" \
