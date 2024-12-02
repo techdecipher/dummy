@@ -13,7 +13,7 @@ phases:
         done
         
       - echo "Uploading back to  s3 with updated file"
-      - aws s3 cp ./test_file.py s3://<bucket-name>/dag/test_file.py
+      - aws s3 cp ./test_file.py s3://testairflow3poc/dag/test_file.py
   post_build:
     commands:
       - echo "Successful."
