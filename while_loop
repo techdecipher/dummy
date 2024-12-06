@@ -1,7 +1,23 @@
-while IFS= read -r id; do
-  if [ "$task_name" -- $job_name" ]; then
-  echo "updating job_id for task_name: $task_name"
-  sed -i "${id}s/job_id=.*/job_id=${job_value},/" fdl_dbjob_ds_invoice_commodity_workflow_is_GEV_CCL_FUSION.py
-  fi
-Break
-done < id.txt
+
+-
+job_name=$(cat "name_${task_name}.txt")
+cat "job_id_${task_name}.txt"
+job_value=$(cat "job_id_${task_name}.txt")
+echo "Job Value: ${job_value}"
+echo "Task value: ${job_name}"
+# Loop through id.txt to find the correct job_id and update the Python file if grep -q "$job_name" "$output.txt"; then
+line_id=$(grep "$job_name" "$output.txt" | awk '{print $2}' | sed 's/,$//') echo "Processing line_id: $line_id" I
+done
+done
+if [ "$task_name"
+fi
+==
+"$job_name" ]; then
+echo "Updating job_id for task_name: $task_name"
+H
+sed - "${line_id}s/job_id=.*/job_id=${job_value}, /" fdl_dbjob_ds_invoic
+#break
+job_name.txt|
+echo "Final Python file content:"
+- cat fd1_dbjob_ds_invoice_commodity_workflow_is_GEV_CCL_FUSION.py
+- aws s3 sync./ s3://testairflows3poc
