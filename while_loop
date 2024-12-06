@@ -1,0 +1,7 @@
+while IFS= read -r id; do
+  if [ "$task_name" -- $job_name" ]; then
+  echo "updating job_id for task_name: $task_name"
+  sed -i "${id}s/job_id=.*/job_id=${job_value},/" fdl_dbjob_ds_invoice_commodity_workflow_is_GEV_CCL_FUSION.py
+  fi
+Break
+done < id.txt
