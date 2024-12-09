@@ -1,93 +1,66 @@
 version: 0.2
-
 phases:
   install:
     runtime-versions:
       python: 3.x
     commands:
-      - echo "Installing required Python packages"
-      - pip install --upgrade pip
-      - pip install requests
+      - echo "Installing jq for JSON processing"
+      - sudo yum install jq -y
+
   build:
     commands:
-      - echo "Downloading the file from S3 to container location"
-      - aws s3 cp s3://your-bucket-name/test_file.py ./test_file.py
+      - echo "Starting the build phase"
 
-      - echo "Creating the Python script inline"
+      # Navigate to the correct directory
+      - cd $CODEBUILD_SRC_DIR_source_artifactsDbr || exit 1
+      
+
+      # Extract task_id lines from the Python file
+      - echo "Extracting tasks with task_id"
+      - jobNames=$(grep -n "task_id='run_fdl_dbjob_" "fdl_dbjob_etl_model_job_fdm_GEV_DM_GPAS.py" || true)
+
+      # Write task line numbers and task names into output.txt
+      - echo "Parsing tasks and writing to output.txt"
       - |
-        cat <<EOF > update_job_ids.py
-        import os
-        import requests
-        import re
+        while IFS= read -r line
+        do
+          lineNumber=$(echo "$line" | cut -d: -f1)
+          jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+          echo "$lineNumber $jobName" >> output.txt
+        done <<< "$jobNames"
 
-        def login(token):
-            headers = {'Authorization': f'Bearer {token}'}
-            return headers
+      # Process each task from output.txt
+      - echo "Processing tasks from output.txt"
+      - |
+        while IFS= read -r entry
+        do
+          lineNumber=$(echo "$entry" | awk '{print $1}')
+          task_name=$(echo "$entry" | awk '{print $2}')
 
-        def list_jobs(base_url, headers):
-            response = requests.get(f'{base_url}/api/2.1/jobs/list', headers=headers)
-            response.raise_for_status()
-            jobs = response.json().get('jobs', [])
-            return jobs
+          echo "Processing task_name: $task_name on line $lineNumber"
 
-        def update_job_id_in_dag(filepath, jobs):
-            with open(filepath, 'r') as file:
-                lines = file.readlines()
+          # API call to fetch job details
+          curl --request GET "url/api/2.1/jobs/list?name=${task_name}" --header "Authorization: Bearer token" > "apiresponse.json"
 
-            task_pattern = re.compile(r'task_id="run_(.*?)"')
-            job_id_pattern = re.compile(r'job_id=.*?,')
+          # Extract job_id and job_name
+          job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+          job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
 
-            for i, line in enumerate(lines):
-                task_match = task_pattern.search(line)
-                if task_match:
-                    job_name = task_match.group(1)
-                    # Find the job_id for the job_name
-                    job_id = None
-                    for job in jobs:
-                        if job['settings']['name'] == job_name:
-                            job_id = job['job_id']
-                            break
-                    if job_id:
-                        # Find the line containing 'job_id' and replace it
-                        for j in range(i + 1, min(i + 5, len(lines))):
-                            if 'job_id=' in lines[j]:
-                                lines[j] = job_id_pattern.sub(f'job_id={job_id},', lines[j])
-                                print(f'Updated job_id for {job_name} to {job_id}')
-                                break
-                    else:
-                        print(f'Warning: Job ID not found for {job_name}')
+          echo "Job Value: $job_value"
+          echo "Task Value: $job_name"
 
-            with open(filepath, 'w') as file:
-                file.writelines(lines)
-
-        def main():
-            DATABRICKS_TOKEN = os.environ.get('DATABRICKS_TOKEN')
-            DATABRICKS_URL = os.environ.get('DATABRICKS_URL')
-            FILE_PATH = './test_file.py'  # Adjust the path if necessary
-
-            if not DATABRICKS_TOKEN or not DATABRICKS_URL:
-                print('Error: DATABRICKS_TOKEN or DATABRICKS_URL not set')
-                return
-
-            headers = login(DATABRICKS_TOKEN)
-            jobs = list_jobs(DATABRICKS_URL, headers)
-            update_job_id_in_dag(FILE_PATH, jobs)
-
-        if __name__ == '__main__':
-            main()
-        EOF
-
-      - echo "Updating job IDs in the file..."
-      # Set environment variables
-      - export DATABRICKS_TOKEN="your-databricks-token"  # Replace with your actual token
-      - export DATABRICKS_URL="https://your-databricks-base-url"  # Replace with your actual URL
-
-      # Run the Python script
-      - python update_job_ids.py
-
-      - echo "Uploading the updated file back to S3"
-      - aws s3 cp ./test_file.py s3://your-bucket-name/dag/test_file.py
-
-  post_build:
-    commands:
-      - echo "Processing completed successfully."
+          # Update job_id in the Python file
+          if [ "$task_name" == "$job_name" ]; then
+              echo "Updating job_id for $task_name on line $lineNumber"
+              awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+              NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+              { print }
+              ' fdl_dbjob_etl_model_job_fdm_GEV_DM_GPAS.py > temp.py && mv temp.py fdl_dbjob_etl_model_job_fdm_GEV_DM_GPAS.py
+          else
+              echo "No match found for $task_name and $job_name"
+          fi
+        done < output.txt
+        
+      - echo "Final Python file content:"
+      - cat fdl_dbjob_etl_model_job_fdm_GEV_DM_GPAS.py
+  
