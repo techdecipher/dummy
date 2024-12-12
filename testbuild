@@ -1,74 +1,77 @@
 version: 0.2
-
 phases:
   install:
     runtime-versions:
       python: 3.x
     commands:
-      - pip install --upgrade pip
-      - pip install requests
+      - echo "Installing jq for JSON processing"
+      - sudo yum install jq -y
+ 
   build:
     commands:
-      - echo "Downloading DAG file from S3"
-      - aws s3 cp s3://your-bucket/your_dag.py ./your_dag.py
-
-      - echo "Creating the Python script inline"
+      - echo "Starting the build phase"
+      - cd $CODEBUILD_SRC_DIR_source_artifactsDbr || exit 1
+      - echo "Navigated to $CODEBUILD_SRC_DIR_source_artifactsDbr"
+ 
+      # Find all Python files in the directory
+      - echo "Finding all Python files in the directory"
+      - python_files=$(find . -name "*.py")
+ 
+      # Loop through each Python file and perform the tasks
+      - echo "Processing each Python file"
       - |
-        cat <<EOF > update_job_ids.py
-        import sys
-        import requests
-        import re
-
-        def list_jobs():
-            # Hardcoded API endpoint and token
-            databricks_host = 'https://your-databricks-workspace-url'  # Replace with your Databricks URL
-            databricks_token = 'your-databricks-token'                 # Replace with your Databricks token
-            headers = {'Authorization': f'Bearer {databricks_token}'}
-            response = requests.get(f'{databricks_host}/api/2.1/jobs/list', headers=headers)
-            response.raise_for_status()
-            jobs = response.json()
-            return jobs
-
-        def update_job_id_in_dag(filepath, jobs_data):
-            with open(filepath, 'r') as file:
-                lines = file.readlines()
-            task_pattern = re.compile(r"task_id='run_(.*?)'")
-            job_id_pattern = re.compile(r'job_id=.*?,')
-            for i, line in enumerate(lines):
-                task_match = task_pattern.search(line)
-                if task_match:
-                    job_name = task_match.group(1).strip()
-                    job_id = None
-                    for job in jobs_data.get('jobs', []):
-                        if job['settings']['name'] == job_name:
-                            job_id = job['job_id']
-                            break
-                    if not job_id:
-                        error_message = f"{job_name} does not exist"
-                        print(error_message)
-                        sys.exit(1)
-                    # Update the job_id in the next line
-                    for j in range(i + 1, min(i + 5, len(lines))):
-                        if 'job_id=' in lines[j]:
-                            lines[j] = job_id_pattern.sub(f'job_id={job_id},', lines[j])
-                            break
-            with open(filepath, 'w') as file:
-                file.writelines(lines)
-
-        def main():
-            jobs_data = list_jobs()
-            update_job_id_in_dag('./your_dag.py', jobs_data)
-
-        if __name__ == '__main__':
-            main()
-        EOF
-
-      - echo "Running the Python script"
-      - python update_job_ids.py
-
-      - echo "Uploading updated DAG file back to S3"
-      - aws s3 cp ./your_dag.py s3://your-bucket/updated_your_dag.py
-
-post_build:
-  commands:
-    - echo "Build completed successfully."
+        for python_file in $python_files; do
+          echo "Processing file: $python_file"
+ 
+          # Extract task_id lines from the current Python file
+          jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
+ 
+          # Write task line numbers and task names into output.txt
+          echo "Parsing tasks from $python_file and writing to output.txt" > output.txt
+          while IFS= read -r line; do
+            lineNumber=$(echo "$line" | cut -d: -f1)
+            jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+            echo "$lineNumber $jobName" >> output.txt
+          done <<< "$jobNames"
+ 
+          # Process each task from output.txt
+          echo "Processing tasks from output.txt"
+          while IFS= read -r entry; do
+            lineNumber=$(echo "$entry" | awk '{print $1}')
+            task_name=$(echo "$entry" | awk '{print $2}')
+ 
+            echo "Processing task_name: $task_name on line $lineNumber"
+            curl --connect-timeout 30 --retry 3 --retry-delay 5 \
+                --request GET "https://url/api/2.1/jobs/list?name=${task_name}" \
+                --header "Authorization: Bearer token" > "apiresponse.json"
+ 
+            job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+            job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+            if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                echo "Error: Missing job details for task_name: $task_name"
+                continue
+            fi
+ 
+            echo "Job Value: $job_value"
+            echo "Task Value: $job_name"
+            if [ "$task_name" == "$job_name" ]; then
+                echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                { print }
+                ' "$python_file" > temp.py && mv temp.py "$python_file"
+            else
+                echo "No match found for $task_name and $job_name"
+            fi
+          done < output.txt
+ 
+          # Debugging: Output the updated Python file
+          echo "Final Python file content for $python_file:"
+          cat "$python_file"
+        done
+ 
+      # Sync the updated files to S3
+      - echo "Syncing files to S3"
+      #- aws s3 sync ./ s3://testairflows3poc
+ #     - aws s3 cp ./ s3://testairflows3poc  --recursive --exclude "*" --include "*.py"
+      - aws s3 cp ./ s3://testairflows3poc  --recursive --include "*.py"
