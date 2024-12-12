@@ -10,17 +10,37 @@ phases:
   build:
     commands:
       - echo "Starting the build phase"
+
+      # Remove the existing directory if it exists
+      - if [ -d "$CODEBUILD_SRC_DIR_source_artifactsDbr" ]; then
+          echo "Removing existing directory";
+          rm -rf $CODEBUILD_SRC_DIR_source_artifactsDbr;
+        fi
+
+      # Clone the repository
+      - echo "Cloning the repository"
+      - git clone https://api $CODEBUILD_SRC_DIR_source_artifactsDbr
+      
+      # Navigate to the correct directory
       - cd $CODEBUILD_SRC_DIR_source_artifactsDbr || exit 1
       - echo "Navigated to $CODEBUILD_SRC_DIR_source_artifactsDbr"
- 
-      # Find all Python files in the directory
-      - echo "Finding all Python files in the directory"
-      - python_files=$(find . -name "*.py")
+
+      # Set GIT_DISCOVERY_ACROSS_FILESYSTEM to allow Git to search across filesystem boundaries
+      #- export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+
+
+      # Get the list of recently modified or committed Python files
+      - echo "Getting the list of recently modified or committed Python files"
+      - modified_files=$(git diff --name-only HEAD~1 | grep '\.py$')
+     - echo "$modified_files"
+
+      # Check if there are any modified Python files
+      
  
       # Loop through each Python file and perform the tasks
       - echo "Processing each Python file"
       - |
-        for python_file in $python_files; do
+        for python_file in $modified_files; do
           echo "Processing file: $python_file"
  
           # Extract task_id lines from the current Python file
@@ -42,7 +62,7 @@ phases:
  
             echo "Processing task_name: $task_name on line $lineNumber"
             curl --connect-timeout 30 --retry 3 --retry-delay 5 \
-                --request GET "https://url/api/2.1/jobs/list?name=${task_name}" \
+                --request GET "api-url/api/2.1/jobs/list?name=${task_name}" \
                 --header "Authorization: Bearer token" > "apiresponse.json"
  
             job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
@@ -74,4 +94,4 @@ phases:
       - echo "Syncing files to S3"
       #- aws s3 sync ./ s3://testairflows3poc
  #     - aws s3 cp ./ s3://testairflows3poc  --recursive --exclude "*" --include "*.py"
-      - aws s3 cp ./ s3://testairflows3poc  --recursive --include "*.py"
+    #  - aws s3 cp ./ s3://testairflows3poc  --recursive --include "*.py"
