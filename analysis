@@ -4,38 +4,414 @@ phases:
     runtime-versions:
       python: 3.x
 
+ 
   build:
     commands:
+      
       - cd $CODEBUILD_SRC_DIR_source_artifactsDbr || exit 1
       - echo "Navigated to $CODEBUILD_SRC_DIR_source_artifactsDbr"
       - echo "Fetching the latest changes from the repository"
       - cd FDL/dags
       - ls -ltrh
       - echo "Defining modified files manually"
-
+      
       - export modified_dags_files=$modified_dags_files
       - export modified_scripts_files=$modified_scripts_files
-      - echo "modified_dags_files: $modified_dags_files"
-      - echo "modified_scripts_files: $modified_scripts_files"
-
+      - echo "$modified_dags_files"
+      - echo "$modified_scripts_files"
       - |
         if [ "$modified_dags_files" ] && [ "$modified_scripts_files" ]; then
-            echo "Both modified_dags_files and modified_scripts_files are set"
-            echo "Processing modified files in both dags and scripts directories"
-            # Handle both modified_dags_files and modified_scripts_files logic here
-
-        elif [ "$modified_dags_files" ]; then
-            echo "modified files under dags only active"
-
-        elif [ "$modified_scripts_files" ]; then
+            echo "modified files under both dags and scripts env variable is active"
+            echo "first processing dags files"
+            for python_file in $modified_dags_files; do
+              echo "Processing file: $python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
+ 
+              # Write task line numbers and task names into output.txt
+              # echo "Parsing tasks from $python_file and writing to output.txt" > output.txt
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+                if [ "$task_name" ] && [ "$lineNumber" ]; then
+                
+                     echo "Processing task_name: $task_name on line $lineNumber"
+                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
+                        --request GET "url/api/2.1/jobs/list?name=${task_name}" \
+                        --header "Authorization: Bearer token" > "apiresponse.json"
+ 
+                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                          echo "Error: Missing job details for task_name: $task_name"
+                          continue
+                     fi
+ 
+                    echo "Job Value: $job_value"
+                    echo "Task Value: $job_name"
+                     if [ "$task_name" == "$job_name" ]; then
+                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                         { print }
+                         ' "$python_file" > temp.py && mv temp.py "$python_file"
+                     else
+                         echo "No match found for $task_name and $job_name"
+                     fi
+                else
+                    echo "There is no job name in $python_file"
+                fi
+              done < output.txt
+ 
+              # Debugging: Output the updated Python file
+              echo "Final Python file content for $python_file:"
+              cat "$python_file"
+            done
+ 
+           # Sync the updated files to S3
+           echo "Syncing files to S3"
+           echo "checking current directory"
+           pwd
+           aws s3 sync ./ s3://testairflows3poc/dags --exclude "*" --include "*.py"
+           
+            echo "now processing scripts files"
             cd ..
             cd scripts
             echo "Script section is running"
-            echo "modified files under scripts only active"
+            for python_file in $modified_scripts_files; do
+              echo "Processing file: $python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
 
-        else
-            echo "Running for all .py files in dags and scripts directories"
-            # Handle the logic for processing all files here
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+
+                if [ "$task_name" ] && [ "$lineNumber" ]; then
+                
+                     echo "Processing task_name: $task_name on line $lineNumber"
+                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
+                        --request GET "url/api/2.1/jobs/list?name=${task_name}" \
+                        --header "Authorization: Bearer token" > "apiresponse.json"
+ 
+                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                          echo "Error: Missing job details for task_name: $task_name"
+                          continue
+                     fi
+ 
+                    echo "Job Value: $job_value"
+                    echo "Task Value: $job_name"
+                     if [ "$task_name" == "$job_name" ]; then
+                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                         { print }
+                         ' "$python_file" > temp.py && mv temp.py "$python_file"
+                     else
+                         echo "No match found for $task_name and $job_name"
+                     fi
+                else
+                    echo "There is no job name in $python_file"
+                fi
+              done < output.txt
+ 
+              # Debugging: Output the updated Python file
+              echo "Final Python file content for $python_file:"
+              cat "$python_file"
+            done
+ 
+            #Sync the updated files to S3
+            echo "Syncing files to S3"
+            echo "checking current directory"
+            pwd
+            aws s3 sync ./ s3://testairflows3poc/scripts --exclude "*" --include "*.py"
+        elif [  "$modified_dags_files" ]; then
+            echo "modified files under dags only active"
+    
+            echo "$modified_dags_files"
+     
+            # Loop through each Python file and perform the tasks
+            echo "Processing each Python file"
+      
+            for python_file in $modified_dags_files; do
+              echo "Processing file: $python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
+ 
+              # Write task line numbers and task names into output.txt
+              # echo "Parsing tasks from $python_file and writing to output.txt" > output.txt
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+                if [ "$task_name" ] && [ "$lineNumber" ]; then
+                
+                     echo "Processing task_name: $task_name on line $lineNumber"
+                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
+                        --request GET "url/api/2.1/jobs/list?name=${task_name}" \
+                        --header "Authorization: Bearer token" > "apiresponse.json"
+ 
+                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                          echo "Error: Missing job details for task_name: $task_name"
+                          continue
+                     fi
+ 
+                    echo "Job Value: $job_value"
+                    echo "Task Value: $job_name"
+                     if [ "$task_name" == "$job_name" ]; then
+                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                         { print }
+                         ' "$python_file" > temp.py && mv temp.py "$python_file"
+                     else
+                         echo "No match found for $task_name and $job_name"
+                     fi
+                else
+                    echo "There is no job name in $python_file"
+                fi
+              done < output.txt
+ 
+              # Debugging: Output the updated Python file
+              echo "Final Python file content for $python_file:"
+              cat "$python_file"
+            done
+ 
+           # Sync the updated files to S3
+           echo "Syncing files to S3"
+           echo "checking current directory"
+           pwd
+           aws s3 sync ./ s3://testairflows3poc/dags --exclude "*" --include "*.py"
+    
+        elif [  "$modified_scripts_files" ]; then
             cd ..
             cd scripts
-            echo "Running for all .py files in scripts directory"
+            echo "Script section is running"
+            for python_file in $modified_scripts_files; do
+              echo "Processing file: $python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
+
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+
+                if [ "$task_name" ] && [ "$lineNumber" ]; then
+                
+                     echo "Processing task_name: $task_name on line $lineNumber"
+                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
+                        --request GET "url/api/2.1/jobs/list?name=${task_name}" \
+                        --header "Authorization: Bearer token" > "apiresponse.json"
+ 
+                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                          echo "Error: Missing job details for task_name: $task_name"
+                          continue
+                     fi
+ 
+                    echo "Job Value: $job_value"
+                    echo "Task Value: $job_name"
+                     if [ "$task_name" == "$job_name" ]; then
+                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                         { print }
+                         ' "$python_file" > temp.py && mv temp.py "$python_file"
+                     else
+                         echo "No match found for $task_name and $job_name"
+                     fi
+                else
+                    echo "There is no job name in $python_file"
+                fi
+              done < output.txt
+ 
+              # Debugging: Output the updated Python file
+              echo "Final Python file content for $python_file:"
+              cat "$python_file"
+            done
+ 
+            #Sync the updated files to S3
+            echo "Syncing files to S3"
+            echo "checking current directory"
+            pwd
+            aws s3 sync ./ s3://testairflows3poc/scripts --exclude "*" --include "*.py"
+      
+        else
+            echo "runing for all py files at dags directory"
+            # Find all Python files in the directory
+            echo "Finding all Python files in the directory"
+            python_files=$(find . -name "*.py")
+ 
+            #Loop through each Python file and perform the tasks
+            echo "Processing each Python file"
+            for python_file in $python_files; do
+              echo "Processing file: $python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
+ 
+              # Write task line numbers and task names into output.txt
+              echo "Parsing tasks from $python_file and writing to output.txt" > output.txt
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+ 
+                echo "Processing task_name: $task_name on line $lineNumber"
+                curl --connect-timeout 30 --retry 3 --retry-delay 5 \
+                    --request GET "url/api/2.1/jobs/list?name=${task_name}" \
+                    --header "Authorization: Bearer token" > "apiresponse.json"
+ 
+                job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                    echo "Error: Missing job details for task_name: $task_name"
+                    continue
+                fi
+ 
+                echo "Job Value: $job_value"
+                echo "Task Value: $job_name"
+                if [ "$task_name" == "$job_name" ]; then
+                    echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                    awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                    NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                    { print }
+                    ' "$python_file" > temp.py && mv temp.py "$python_file"
+                else
+                    echo "No match found for $task_name and $job_name"
+                fi
+              done < output.txt
+ 
+              # Debugging: Output the updated Python file
+              echo "Final Python file content for $python_file:"
+              cat "$python_file"
+            done
+ 
+            # Sync the updated files to S3
+            echo "Syncing files to S3"
+            echo "checking current directory"
+            pwd
+            
+            aws s3 sync ./ s3://testairflows3poc/dags --exclude "*" --include "*.py"
+            
+            #running for all script .py files
+            cd ..
+            cd scripts
+            echo "runing for all py files at scripts directory"
+            # Find all Python files in the directory
+            echo "Finding all Python files in the directory"
+            python_files=$(find . -name "*.py")
+ 
+            #Loop through each Python file and perform the tasks
+            echo "Processing each Python file"
+            for python_file in $python_files; do
+              echo "Processing file: $python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
+ 
+              # Write task line numbers and task names into output.txt
+              echo "Parsing tasks from $python_file and writing to output.txt" > output.txt
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+ 
+                if [ "$task_name" ] && [ "$lineNumber" ]; then
+                
+                     echo "Processing task_name: $task_name on line $lineNumber"
+                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
+                        --request GET "url/api/2.1/jobs/list?name=${task_name}" \
+                        --header "Authorization: Bearer token" > "apiresponse.json"
+ 
+                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                          echo "Error: Missing job details for task_name: $task_name"
+                          continue
+                     fi
+ 
+                    echo "Job Value: $job_value"
+                    echo "Task Value: $job_name"
+                     if [ "$task_name" == "$job_name" ]; then
+                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                         { print }
+                         ' "$python_file" > temp.py && mv temp.py "$python_file"
+                     else
+                         echo "No match found for $task_name and $job_name"
+                     fi
+                else
+                    echo "There is no job name in $python_file"
+                fi
+              done < output.txt
+ 
+              # Debugging: Output the updated Python file
+              echo "Final Python file content for $python_file:"
+              cat "$python_file"
+            done
+ 
+            # Sync the updated files to S3
+            echo "Syncing files to S3"
+            echo "checking current directory"
+            pwd
+            
+            aws s3 sync ./ s3://testairflows3poc/scripts --exclude "*" --include "*.py"
+            
+            
+        fi
