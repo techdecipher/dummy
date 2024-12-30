@@ -4,40 +4,38 @@ phases:
     runtime-versions:
       python: 3.x
 
- 
   build:
     commands:
-      
       - cd $CODEBUILD_SRC_DIR_source_artifactsDbr || exit 1
       - echo "Navigated to $CODEBUILD_SRC_DIR_source_artifactsDbr"
       - echo "Fetching the latest changes from the repository"
       - cd FDL/dags
       - ls -ltrh
       - echo "Defining modified files manually"
-      
+
       - export modified_dags_files=$modified_dags_files
       - export modified_scripts_files=$modified_scripts_files
-      - echo "$modified_dags_files"
+      - echo "modified_dags_files: $modified_dags_files"
+      - echo "modified_scripts_files: $modified_scripts_files"
+
       - |
-        if [  "$modified_dags_files" ]; then
+        if [ "$modified_dags_files" ] && [ "$modified_scripts_files" ]; then
+            echo "Both modified_dags_files and modified_scripts_files are set"
+            echo "Processing modified files in both dags and scripts directories"
+            # Handle both modified_dags_files and modified_scripts_files logic here
+
+        elif [ "$modified_dags_files" ]; then
             echo "modified files under dags only active"
-    
-        elif [  "$modified_scripts_files" ]; then
+
+        elif [ "$modified_scripts_files" ]; then
             cd ..
             cd scripts
             echo "Script section is running"
             echo "modified files under scripts only active"
-      
+
         else
-            echo "runing for all py files at dags directory"
-            # Find all Python files in the directory
-            
-            
-            #running for all script .py files
+            echo "Running for all .py files in dags and scripts directories"
+            # Handle the logic for processing all files here
             cd ..
             cd scripts
-            echo "runing for all py files at scripts directory"
-            # Find all Python files in the directory
-            
-            
-        fi
+            echo "Running for all .py files in scripts directory"
