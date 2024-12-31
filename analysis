@@ -1,210 +1,67 @@
-Processing file: ./job_logging.py
+first processing dags files
+fdl_newfile.py
+Processing file: fdl_newfile.py
 Processing tasks from output.txt
-There is no job name that exists in DBR application for this ./job_logging.py file
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test1 on line 109
+Processing task_name: fdl_dbjob_etl_model_load_epm_fdm on line 109
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   363  100   363    0     0   2506      0 --:--:-- --:--:-- --:--:--  2520
-Job Value: 276195887640108
-Task Value: fdl_dbjob_stateful_mirror_custom_load_test1
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test1 on line 109 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test1 on line 175
+100   348  100   348    0     0    916      0 --:--:-- --:--:-- --:--:--   918
+Job Value: 915798146956898
+Task Value: fdl_dbjob_etl_model_load_epm_fdm
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm on line 109 in fdl_newfile.py
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load on line 175
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   349  100   349    0     0   2292      0 --:--:-- --:--:-- --:--:--  2296
-Job Value: 238093485636224
-Task Value: fdl_dbjob_etl_model_load_epm_fdm_test1
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test1 on line 175 in ./job_logging.py
+100   353  100   353    0     0   1404      0 --:--:-- --:--:-- --:--:--  1406
+Job Value: 327865593925918
+Task Value: fdl_dbjob_stateful_mirror_custom_load
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load on line 175 in fdl_newfile.py
 Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test2 on line 241
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   358  100   358    0     0   2325      0 --:--:-- --:--:-- --:--:--  2339
+100   358  100   358    0     0   1392      0 --:--:-- --:--:-- --:--:--  1387
+100   358  100   358    0     0   1391      0 --:--:-- --:--:-- --:--:--  1387
 Job Value: 569877448314571
 Task Value: fdl_dbjob_etl_model_load_epm_fdm_test2
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 241 in ./job_logging.py
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 241 in fdl_newfile.py
 Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test2 on line 308
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   363  100   363    0     0   2462      0 --:--:-- --:--:-- --:--:--  2452
-100   363  100   363    0     0   2461      0 --:--:-- --:--:-- --:--:--  2452
+100   363  100   363    0     0   1572      0 --:--:-- --:--:-- --:--:--  1578
 Job Value: 192448730741373
 Task Value: fdl_dbjob_stateful_mirror_custom_load_test2
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 308 in ./job_logging.py
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test1 on line 109
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   363  100   363    0     0   2424      0 --:--:-- --:--:-- --:--:--  2436
-Job Value: 276195887640108
-Task Value: fdl_dbjob_stateful_mirror_custom_load_test1
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test1 on line 109 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test1 on line 175
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   349  100   349    0     0   2211      0 --:--:-- --:--:-- --:--:--  2222
-Job Value: 238093485636224
-Task Value: fdl_dbjob_etl_model_load_epm_fdm_test1
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test1 on line 175 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test2 on line 241
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   358  100   358    0     0   2440      0 --:--:-- --:--:-- --:--:--  2452
-Job Value: 569877448314571
-Task Value: fdl_dbjob_etl_model_load_epm_fdm_test2
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 241 in ./job_logging.py
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test2 on line 308
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   363  100   363    0     0   2240      0 --:--:-- --:--:-- --:--:--  2254
-Job Value: 192448730741373
-Task Value: fdl_dbjob_stateful_mirror_custom_load_test2
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 308 in ./job_logging.py
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test1 on line 160
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   363  100   363    0     0   2176      0 --:--:-- --:--:-- --:--:--  2186
-Job Value: 276195887640108
-Task Value: fdl_dbjob_stateful_mirror_custom_load_test1
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test1 on line 160 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test1 on line 227
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   349  100   349    0     0   2220      0 --:--:-- --:--:-- --:--:--  2208
-100   349  100   349    0     0   2219      0 --:--:-- --:--:-- --:--:--  2208
-Job Value: 238093485636224
-Task Value: fdl_dbjob_etl_model_load_epm_fdm_test1
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test1 on line 227 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test2 on line 293
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   358  100   358    0     0   2384      0 --:--:-- --:--:-- --:--:--  2386
-Job Value: 569877448314571
-Task Value: fdl_dbjob_etl_model_load_epm_fdm_test2
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 293 in ./job_logging.py
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test2 on line 375
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   363  100   363    0     0   2270      0 --:--:-- --:--:-- --:--:--  2283
-Job Value: 192448730741373
-Task Value: fdl_dbjob_stateful_mirror_custom_load_test2
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 375 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_model_load_epm_cloud_arm__deliberate_missmatch_to_test_case_7 on line 442
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100    18  100    18    0     0    193      0 --:--:-- --:--:-- --:--:--   195
-Error: Missing job details for task_name: fdl_dbjob_etl_model_load_epm_cloud_arm__deliberate_missmatch_to_test_case_7
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load__deliberate_missmatch_to_test_case_7 on line 519
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100    18  100    18    0     0    165      0 --:--:-- --:--:-- --:--:--   166
-Error: Missing job details for task_name: fdl_dbjob_stateful_mirror_custom_load__deliberate_missmatch_to_test_case_7
-Processing task_name: fdl_dbjob_etl_model_load_epm_cloud_arm__deliberate_missmatch_to_test_case_7 on line 586
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100    18  100    18    0     0    175      0 --:--:-- --:--:-- --:--:--   176
-Error: Missing job details for task_name: fdl_dbjob_etl_model_load_epm_cloud_arm__deliberate_missmatch_to_test_case_7
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test1 on line 151
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   363  100   363    0     0   2462      0 --:--:-- --:--:-- --:--:--  2469
-Job Value: 276195887640108
-Task Value: fdl_dbjob_stateful_mirror_custom_load_test1
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test1 on line 151 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test1 on line 220
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   349  100   349    0     0   2104      0 --:--:-- --:--:-- --:--:--  2102
-Job Value: 238093485636224
-Task Value: fdl_dbjob_etl_model_load_epm_fdm_test1
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test1 on line 220 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test2 on line 330
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   358  100   358    0     0   2324      0 --:--:-- --:--:-- --:--:--  2339
-Job Value: 569877448314571
-Task Value: fdl_dbjob_etl_model_load_epm_fdm_test2
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 330 in ./job_logging.py
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test2 on line 440
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   363  100   363    0     0   2358      0 --:--:-- --:--:-- --:--:--  2372
-Job Value: 192448730741373
-Task Value: fdl_dbjob_stateful_mirror_custom_load_test2
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 440 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_tenant_load__deliberate_missmatch_to_test_case_7 on line 509
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100    18  100    18    0     0    173      0 --:--:-- --:--:-- --:--:--   174
-Error: Missing job details for task_name: fdl_dbjob_etl_tenant_load__deliberate_missmatch_to_test_case_7
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load___deliberate_missmatch_to_test_case_7 on line 578
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100    18  100    18    0     0    181      0 --:--:-- --:--:-- --:--:--   181
-Error: Missing job details for task_name: fdl_dbjob_stateful_mirror_custom_load___deliberate_missmatch_to_test_case_7
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test1 on line 151
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   363  100   363    0     0   2324      0 --:--:-- --:--:-- --:--:--  2326
-Job Value: 276195887640108
-Task Value: fdl_dbjob_stateful_mirror_custom_load_test1
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test1 on line 151 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test1 on line 220
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   349  100   349    0     0   2329      0 --:--:-- --:--:-- --:--:--  2326
-100   349  100   349    0     0   2328      0 --:--:-- --:--:-- --:--:--  2326
-Job Value: 238093485636224
-Task Value: fdl_dbjob_etl_model_load_epm_fdm_test1
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test1 on line 220 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test2 on line 330
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   358  100   358    0     0   2301      0 --:--:-- --:--:-- --:--:--  2309
-Job Value: 569877448314571
-Task Value: fdl_dbjob_etl_model_load_epm_fdm_test2
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 330 in ./job_logging.py
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test2 on line 440
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   363  100   363    0     0   2331      0 --:--:-- --:--:-- --:--:--  2341
-Job Value: 192448730741373
-Task Value: fdl_dbjob_stateful_mirror_custom_load_test2
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 440 in ./job_logging.py
-Processing task_name: fdl_dbjob_etl_tenant_load__deliberate_missmatch_to_test_case_7 on line 509
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100    18  100    18    0     0    183      0 --:--:-- --:--:-- --:--:--   183
-Error: Missing job details for task_name: fdl_dbjob_etl_tenant_load__deliberate_missmatch_to_test_case_7
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load___deliberate_missmatch_to_test_case_7 on line 578
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100    18  100    18    0     0    177      0 --:--:-- --:--:-- --:--:--   178
-Error: Missing job details for task_name: fdl_dbjob_stateful_mirror_custom_load___deliberate_missmatch_to_test_case_7
-There is no job name that exists in DBR application for this ./job_logging.py file
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 308 in fdl_newfile.py
+checking current directory and Syncing files to S3
+/codebuild/output/src705/src/s3/01/FDL/dags
+total 108K
+-rw-rw-r-- 1 root root  171 Dec 31 08:47 users.json
+-rw-rw-r-- 1 root root 9.2K Dec 31 08:47 fdl_newfile1.py
+-rw-rw-r-- 1 root root  31K Dec 31 08:47 fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION_custom2.py
+-rw-rw-r-- 1 root root   10 Dec 31 08:47 fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION.py
+-rw-rw-r-- 1 root root  16K Dec 31 08:47 fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION_custom1.py
+-rw-rw-r-- 1 root root  16K Dec 31 08:47 fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION.py
+-rw-r--r-- 1 root root  170 Dec 31 08:48 output.txt
+-rw-r--r-- 1 root root  363 Dec 31 08:48 apiresponse.json
+-rw-r--r-- 1 root root  16K Dec 31 08:48 fdl_newfile.py
+Completed 15.7 KiB/86.6 KiB (126.4 KiB/s) with 6 file(s) remaining
+upload: ./fdl_newfile.py to s3://testairflows3poc/dags/fdl_newfile.py
+Completed 15.7 KiB/86.6 KiB (126.4 KiB/s) with 5 file(s) remaining
+Completed 45.9 KiB/86.6 KiB (287.0 KiB/s) with 5 file(s) remaining
+upload: ./fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION_custom2.py to s3://testairflows3poc/dags/fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION_custom2.py
+Completed 45.9 KiB/86.6 KiB (287.0 KiB/s) with 4 file(s) remaining
+Completed 61.6 KiB/86.6 KiB (371.3 KiB/s) with 4 file(s) remaining
+upload: ./fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION_custom1.py to s3://testairflows3poc/dags/fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION_custom1.py
+Completed 61.6 KiB/86.6 KiB (371.3 KiB/s) with 3 file(s) remaining
+Completed 77.4 KiB/86.6 KiB (461.9 KiB/s) with 3 file(s) remaining
+upload: ./fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION.py to s3://testairflows3poc/dags/fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION.py
+Completed 77.4 KiB/86.6 KiB (461.9 KiB/s) with 2 file(s) remaining
+Completed 77.4 KiB/86.6 KiB (456.4 KiB/s) with 2 file(s) remaining
+upload: ./fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION.py to s3://testairflows3poc/dags/fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION.py
+Completed 77.4 KiB/86.6 KiB (456.4 KiB/s) with 1 file(s) remaining
+Completed 86.6 KiB/86.6 KiB (406.4 KiB/s) with 1 file(s) remaining
+upload: ./fdl_newfile1.py to s3://testairflows3poc/dags/fdl_newfile1.py
+now processing scripts files
