@@ -1,417 +1,210 @@
-version: 0.2
-phases:
-  install:
-    runtime-versions:
-      python: 3.x
-
- 
-  build:
-    commands:
-      
-      - cd $CODEBUILD_SRC_DIR_source_artifactsDbr || exit 1
-      - echo "Navigated to $CODEBUILD_SRC_DIR_source_artifactsDbr"
-      - echo "Fetching the latest changes from the repository"
-      - cd FDL/dags
-      - ls -ltrh
-      - echo "Defining modified files manually"
-      
-      - export modified_dags_files=$modified_dags_files
-      - export modified_scripts_files=$modified_scripts_files
-      - echo "$modified_dags_files"
-      - echo "$modified_scripts_files"
-      - |
-        if [ "$modified_dags_files" ] && [ "$modified_scripts_files" ]; then
-            echo "modified files under both dags and scripts env variable is active"
-            echo "first processing dags files"
-            for python_file in $modified_dags_files; do
-              echo "Processing file: $python_file"
- 
-              # Extract task_id lines from the current Python file
-              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
- 
-              # Write task line numbers and task names into output.txt
-              # echo "Parsing tasks from $python_file and writing to output.txt" > output.txt
-              while IFS= read -r line; do
-                lineNumber=$(echo "$line" | cut -d: -f1)
-                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
-                echo "$lineNumber $jobName" >> output.txt
-              done <<< "$jobNames"
- 
-              # Process each task from output.txt
-              echo "Processing tasks from output.txt"
-              while IFS= read -r entry; do
-                lineNumber=$(echo "$entry" | awk '{print $1}')
-                task_name=$(echo "$entry" | awk '{print $2}')
-                if [ "$task_name" ] && [ "$lineNumber" ]; then
-                
-                     echo "Processing task_name: $task_name on line $lineNumber"
-                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
-                        --request GET "url/api/2.1/jobs/list?name=${task_name}" \
-                        --header "Authorization: Bearer token" > "apiresponse.json"
- 
-                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
-                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
-                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
-                          echo "Error: Missing job details for task_name: $task_name"
-                          continue
-                     fi
- 
-                    echo "Job Value: $job_value"
-                    echo "Task Value: $job_name"
-                     if [ "$task_name" == "$job_name" ]; then
-                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
-                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
-                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
-                         { print }
-                         ' "$python_file" > temp.py && mv temp.py "$python_file"
-                     else
-                         echo "No match found for $task_name and $job_name"
-                     fi
-                else
-                    echo "There is no job name in $python_file"
-                fi
-              done < output.txt
- 
-              # Debugging: Output the updated Python file
-              echo "Final Python file content for $python_file:"
-              cat "$python_file"
-            done
- 
-           # Sync the updated files to S3
-           echo "Syncing files to S3"
-           echo "checking current directory"
-           pwd
-           aws s3 sync ./ s3://testairflows3poc/dags --exclude "*" --include "*.py"
-           
-            echo "now processing scripts files"
-            cd ..
-            cd scripts
-            echo "Script section is running"
-            for python_file in $modified_scripts_files; do
-              echo "Processing file: $python_file"
- 
-              # Extract task_id lines from the current Python file
-              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
-
-              while IFS= read -r line; do
-                lineNumber=$(echo "$line" | cut -d: -f1)
-                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
-                echo "$lineNumber $jobName" >> output.txt
-              done <<< "$jobNames"
- 
-              # Process each task from output.txt
-              echo "Processing tasks from output.txt"
-              while IFS= read -r entry; do
-                lineNumber=$(echo "$entry" | awk '{print $1}')
-                task_name=$(echo "$entry" | awk '{print $2}')
-
-                if [ "$task_name" ] && [ "$lineNumber" ]; then
-                
-                     echo "Processing task_name: $task_name on line $lineNumber"
-                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
-                        --request GET "url/api/2.1/jobs/list?name=${task_name}" \
-                        --header "Authorization: Bearer token" > "apiresponse.json"
- 
-                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
-                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
-                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
-                          echo "Error: Missing job details for task_name: $task_name"
-                          continue
-                     fi
- 
-                    echo "Job Value: $job_value"
-                    echo "Task Value: $job_name"
-                     if [ "$task_name" == "$job_name" ]; then
-                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
-                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
-                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
-                         { print }
-                         ' "$python_file" > temp.py && mv temp.py "$python_file"
-                     else
-                         echo "No match found for $task_name and $job_name"
-                     fi
-                else
-                    echo "There is no job name in $python_file"
-                fi
-              done < output.txt
- 
-              # Debugging: Output the updated Python file
-              echo "Final Python file content for $python_file:"
-              cat "$python_file"
-            done
- 
-            #Sync the updated files to S3
-            echo "Syncing files to S3"
-            echo "checking current directory"
-            pwd
-            aws s3 sync ./ s3://testairflows3poc/scripts --exclude "*" --include "*.py"
-        elif [  "$modified_dags_files" ]; then
-            echo "modified files under dags only active"
-    
-            echo "$modified_dags_files"
-     
-            # Loop through each Python file and perform the tasks
-            echo "Processing each Python file"
-      
-            for python_file in $modified_dags_files; do
-              echo "Processing file: $python_file"
- 
-              # Extract task_id lines from the current Python file
-              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
- 
-              # Write task line numbers and task names into output.txt
-              # echo "Parsing tasks from $python_file and writing to output.txt" > output.txt
-              while IFS= read -r line; do
-                lineNumber=$(echo "$line" | cut -d: -f1)
-                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
-                echo "$lineNumber $jobName" >> output.txt
-              done <<< "$jobNames"
- 
-              # Process each task from output.txt
-              echo "Processing tasks from output.txt"
-              while IFS= read -r entry; do
-                lineNumber=$(echo "$entry" | awk '{print $1}')
-                task_name=$(echo "$entry" | awk '{print $2}')
-                if [ "$task_name" ] && [ "$lineNumber" ]; then
-                
-                     echo "Processing task_name: $task_name on line $lineNumber"
-                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
-                        --request GET "url/api/2.1/jobs/list?name=${task_name}" \
-                        --header "Authorization: Bearer token" > "apiresponse.json"
- 
-                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
-                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
-                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
-                          echo "Error: Missing job details for task_name: $task_name"
-                          continue
-                     fi
- 
-                    echo "Job Value: $job_value"
-                    echo "Task Value: $job_name"
-                     if [ "$task_name" == "$job_name" ]; then
-                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
-                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
-                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
-                         { print }
-                         ' "$python_file" > temp.py && mv temp.py "$python_file"
-                     else
-                         echo "No match found for $task_name and $job_name"
-                     fi
-                else
-                    echo "There is no job name in $python_file"
-                fi
-              done < output.txt
- 
-              # Debugging: Output the updated Python file
-              echo "Final Python file content for $python_file:"
-              cat "$python_file"
-            done
- 
-           # Sync the updated files to S3
-           echo "Syncing files to S3"
-           echo "checking current directory"
-           pwd
-           aws s3 sync ./ s3://testairflows3poc/dags --exclude "*" --include "*.py"
-    
-        elif [  "$modified_scripts_files" ]; then
-            cd ..
-            cd scripts
-            echo "Script section is running"
-            for python_file in $modified_scripts_files; do
-              echo "Processing file: $python_file"
- 
-              # Extract task_id lines from the current Python file
-              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
-
-              while IFS= read -r line; do
-                lineNumber=$(echo "$line" | cut -d: -f1)
-                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
-                echo "$lineNumber $jobName" >> output.txt
-              done <<< "$jobNames"
- 
-              # Process each task from output.txt
-              echo "Processing tasks from output.txt"
-              while IFS= read -r entry; do
-                lineNumber=$(echo "$entry" | awk '{print $1}')
-                task_name=$(echo "$entry" | awk '{print $2}')
-
-                if [ "$task_name" ] && [ "$lineNumber" ]; then
-                
-                     echo "Processing task_name: $task_name on line $lineNumber"
-                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
-                        --request GET "url/api/2.1/jobs/list?name=${task_name}" \
-                        --header "Authorization: Bearer token" > "apiresponse.json"
- 
-                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
-                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
-                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
-                          echo "Error: Missing job details for task_name: $task_name"
-                          continue
-                     fi
- 
-                    echo "Job Value: $job_value"
-                    echo "Task Value: $job_name"
-                     if [ "$task_name" == "$job_name" ]; then
-                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
-                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
-                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
-                         { print }
-                         ' "$python_file" > temp.py && mv temp.py "$python_file"
-                     else
-                         echo "No match found for $task_name and $job_name"
-                     fi
-                else
-                    echo "There is no job name in $python_file"
-                fi
-              done < output.txt
- 
-              # Debugging: Output the updated Python file
-              echo "Final Python file content for $python_file:"
-              cat "$python_file"
-            done
- 
-            #Sync the updated files to S3
-            echo "Syncing files to S3"
-            echo "checking current directory"
-            pwd
-            aws s3 sync ./ s3://testairflows3poc/scripts --exclude "*" --include "*.py"
-      
-        else
-            echo "runing for all py files at dags directory"
-            # Find all Python files in the directory
-            echo "Finding all Python files in the directory"
-            python_files=$(find . -name "*.py")
- 
-            #Loop through each Python file and perform the tasks
-            echo "Processing each Python file"
-            for python_file in $python_files; do
-              echo "Processing file: $python_file"
- 
-              # Extract task_id lines from the current Python file
-              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
- 
-              # Write task line numbers and task names into output.txt
-              echo "Parsing tasks from $python_file and writing to output.txt" > output.txt
-              while IFS= read -r line; do
-                lineNumber=$(echo "$line" | cut -d: -f1)
-                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
-                echo "$lineNumber $jobName" >> output.txt
-              done <<< "$jobNames"
- 
-              # Process each task from output.txt
-              echo "Processing tasks from output.txt"
-              while IFS= read -r entry; do
-                lineNumber=$(echo "$entry" | awk '{print $1}')
-                task_name=$(echo "$entry" | awk '{print $2}')
- 
-                echo "Processing task_name: $task_name on line $lineNumber"
-                curl --connect-timeout 30 --retry 3 --retry-delay 5 \
-                    --request GET "url/api/2.1/jobs/list?name=${task_name}" \
-                    --header "Authorization: Bearer token" > "apiresponse.json"
- 
-                job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
-                job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
-                if [ -z "$job_value" ] || [ -z "$job_name" ]; then
-                    echo "Error: Missing job details for task_name: $task_name"
-                    continue
-                fi
- 
-                echo "Job Value: $job_value"
-                echo "Task Value: $job_name"
-                if [ "$task_name" == "$job_name" ]; then
-                    echo "Updating job_id for $task_name on line $lineNumber in $python_file"
-                    awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
-                    NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
-                    { print }
-                    ' "$python_file" > temp.py && mv temp.py "$python_file"
-                else
-                    echo "No match found for $task_name and $job_name"
-                fi
-              done < output.txt
- 
-              # Debugging: Output the updated Python file
-              echo "Final Python file content for $python_file:"
-              cat "$python_file"
-            done
- 
-            # Sync the updated files to S3
-            echo "Syncing files to S3"
-            echo "checking current directory"
-            pwd
-            
-            aws s3 sync ./ s3://testairflows3poc/dags --exclude "*" --include "*.py"
-            
-            #running for all script .py files
-            cd ..
-            cd scripts
-            echo "runing for all py files at scripts directory"
-            # Find all Python files in the directory
-            echo "Finding all Python files in the directory"
-            python_files=$(find . -name "*.py")
- 
-            #Loop through each Python file and perform the tasks
-            echo "Processing each Python file"
-            for python_file in $python_files; do
-              echo "Processing file: $python_file"
- 
-              # Extract task_id lines from the current Python file
-              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
- 
-              # Write task line numbers and task names into output.txt
-              echo "Parsing tasks from $python_file and writing to output.txt" > output.txt
-              while IFS= read -r line; do
-                lineNumber=$(echo "$line" | cut -d: -f1)
-                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
-                echo "$lineNumber $jobName" >> output.txt
-              done <<< "$jobNames"
- 
-              # Process each task from output.txt
-              echo "Processing tasks from output.txt"
-              while IFS= read -r entry; do
-                lineNumber=$(echo "$entry" | awk '{print $1}')
-                task_name=$(echo "$entry" | awk '{print $2}')
- 
-                if [ "$task_name" ] && [ "$lineNumber" ]; then
-                
-                     echo "Processing task_name: $task_name on line $lineNumber"
-                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
-                        --request GET "url/api/2.1/jobs/list?name=${task_name}" \
-                        --header "Authorization: Bearer token" > "apiresponse.json"
- 
-                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
-                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
-                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
-                          echo "Error: Missing job details for task_name: $task_name"
-                          continue
-                     fi
- 
-                    echo "Job Value: $job_value"
-                    echo "Task Value: $job_name"
-                     if [ "$task_name" == "$job_name" ]; then
-                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
-                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
-                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
-                         { print }
-                         ' "$python_file" > temp.py && mv temp.py "$python_file"
-                     else
-                         echo "No match found for $task_name and $job_name"
-                     fi
-                else
-                    echo "There is no job name in $python_file"
-                fi
-              done < output.txt
- 
-              # Debugging: Output the updated Python file
-              echo "Final Python file content for $python_file:"
-              cat "$python_file"
-            done
- 
-            # Sync the updated files to S3
-            echo "Syncing files to S3"
-            echo "checking current directory"
-            pwd
-            
-            aws s3 sync ./ s3://testairflows3poc/scripts --exclude "*" --include "*.py"
-            
-            
-        fi
+Processing file: ./job_logging.py
+Processing tasks from output.txt
+There is no job name that exists in DBR application for this ./job_logging.py file
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test1 on line 109
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   363  100   363    0     0   2506      0 --:--:-- --:--:-- --:--:--  2520
+Job Value: 276195887640108
+Task Value: fdl_dbjob_stateful_mirror_custom_load_test1
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test1 on line 109 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test1 on line 175
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   349  100   349    0     0   2292      0 --:--:-- --:--:-- --:--:--  2296
+Job Value: 238093485636224
+Task Value: fdl_dbjob_etl_model_load_epm_fdm_test1
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test1 on line 175 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test2 on line 241
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   358  100   358    0     0   2325      0 --:--:-- --:--:-- --:--:--  2339
+Job Value: 569877448314571
+Task Value: fdl_dbjob_etl_model_load_epm_fdm_test2
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 241 in ./job_logging.py
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test2 on line 308
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   363  100   363    0     0   2462      0 --:--:-- --:--:-- --:--:--  2452
+100   363  100   363    0     0   2461      0 --:--:-- --:--:-- --:--:--  2452
+Job Value: 192448730741373
+Task Value: fdl_dbjob_stateful_mirror_custom_load_test2
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 308 in ./job_logging.py
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test1 on line 109
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   363  100   363    0     0   2424      0 --:--:-- --:--:-- --:--:--  2436
+Job Value: 276195887640108
+Task Value: fdl_dbjob_stateful_mirror_custom_load_test1
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test1 on line 109 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test1 on line 175
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   349  100   349    0     0   2211      0 --:--:-- --:--:-- --:--:--  2222
+Job Value: 238093485636224
+Task Value: fdl_dbjob_etl_model_load_epm_fdm_test1
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test1 on line 175 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test2 on line 241
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   358  100   358    0     0   2440      0 --:--:-- --:--:-- --:--:--  2452
+Job Value: 569877448314571
+Task Value: fdl_dbjob_etl_model_load_epm_fdm_test2
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 241 in ./job_logging.py
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test2 on line 308
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   363  100   363    0     0   2240      0 --:--:-- --:--:-- --:--:--  2254
+Job Value: 192448730741373
+Task Value: fdl_dbjob_stateful_mirror_custom_load_test2
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 308 in ./job_logging.py
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test1 on line 160
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   363  100   363    0     0   2176      0 --:--:-- --:--:-- --:--:--  2186
+Job Value: 276195887640108
+Task Value: fdl_dbjob_stateful_mirror_custom_load_test1
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test1 on line 160 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test1 on line 227
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   349  100   349    0     0   2220      0 --:--:-- --:--:-- --:--:--  2208
+100   349  100   349    0     0   2219      0 --:--:-- --:--:-- --:--:--  2208
+Job Value: 238093485636224
+Task Value: fdl_dbjob_etl_model_load_epm_fdm_test1
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test1 on line 227 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test2 on line 293
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   358  100   358    0     0   2384      0 --:--:-- --:--:-- --:--:--  2386
+Job Value: 569877448314571
+Task Value: fdl_dbjob_etl_model_load_epm_fdm_test2
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 293 in ./job_logging.py
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test2 on line 375
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   363  100   363    0     0   2270      0 --:--:-- --:--:-- --:--:--  2283
+Job Value: 192448730741373
+Task Value: fdl_dbjob_stateful_mirror_custom_load_test2
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 375 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_model_load_epm_cloud_arm__deliberate_missmatch_to_test_case_7 on line 442
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    18  100    18    0     0    193      0 --:--:-- --:--:-- --:--:--   195
+Error: Missing job details for task_name: fdl_dbjob_etl_model_load_epm_cloud_arm__deliberate_missmatch_to_test_case_7
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load__deliberate_missmatch_to_test_case_7 on line 519
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    18  100    18    0     0    165      0 --:--:-- --:--:-- --:--:--   166
+Error: Missing job details for task_name: fdl_dbjob_stateful_mirror_custom_load__deliberate_missmatch_to_test_case_7
+Processing task_name: fdl_dbjob_etl_model_load_epm_cloud_arm__deliberate_missmatch_to_test_case_7 on line 586
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    18  100    18    0     0    175      0 --:--:-- --:--:-- --:--:--   176
+Error: Missing job details for task_name: fdl_dbjob_etl_model_load_epm_cloud_arm__deliberate_missmatch_to_test_case_7
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test1 on line 151
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   363  100   363    0     0   2462      0 --:--:-- --:--:-- --:--:--  2469
+Job Value: 276195887640108
+Task Value: fdl_dbjob_stateful_mirror_custom_load_test1
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test1 on line 151 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test1 on line 220
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   349  100   349    0     0   2104      0 --:--:-- --:--:-- --:--:--  2102
+Job Value: 238093485636224
+Task Value: fdl_dbjob_etl_model_load_epm_fdm_test1
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test1 on line 220 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test2 on line 330
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   358  100   358    0     0   2324      0 --:--:-- --:--:-- --:--:--  2339
+Job Value: 569877448314571
+Task Value: fdl_dbjob_etl_model_load_epm_fdm_test2
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 330 in ./job_logging.py
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test2 on line 440
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   363  100   363    0     0   2358      0 --:--:-- --:--:-- --:--:--  2372
+Job Value: 192448730741373
+Task Value: fdl_dbjob_stateful_mirror_custom_load_test2
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 440 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_tenant_load__deliberate_missmatch_to_test_case_7 on line 509
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    18  100    18    0     0    173      0 --:--:-- --:--:-- --:--:--   174
+Error: Missing job details for task_name: fdl_dbjob_etl_tenant_load__deliberate_missmatch_to_test_case_7
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load___deliberate_missmatch_to_test_case_7 on line 578
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    18  100    18    0     0    181      0 --:--:-- --:--:-- --:--:--   181
+Error: Missing job details for task_name: fdl_dbjob_stateful_mirror_custom_load___deliberate_missmatch_to_test_case_7
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test1 on line 151
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   363  100   363    0     0   2324      0 --:--:-- --:--:-- --:--:--  2326
+Job Value: 276195887640108
+Task Value: fdl_dbjob_stateful_mirror_custom_load_test1
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test1 on line 151 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test1 on line 220
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   349  100   349    0     0   2329      0 --:--:-- --:--:-- --:--:--  2326
+100   349  100   349    0     0   2328      0 --:--:-- --:--:-- --:--:--  2326
+Job Value: 238093485636224
+Task Value: fdl_dbjob_etl_model_load_epm_fdm_test1
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test1 on line 220 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test2 on line 330
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   358  100   358    0     0   2301      0 --:--:-- --:--:-- --:--:--  2309
+Job Value: 569877448314571
+Task Value: fdl_dbjob_etl_model_load_epm_fdm_test2
+Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 330 in ./job_logging.py
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test2 on line 440
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   363  100   363    0     0   2331      0 --:--:-- --:--:-- --:--:--  2341
+Job Value: 192448730741373
+Task Value: fdl_dbjob_stateful_mirror_custom_load_test2
+Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 440 in ./job_logging.py
+Processing task_name: fdl_dbjob_etl_tenant_load__deliberate_missmatch_to_test_case_7 on line 509
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    18  100    18    0     0    183      0 --:--:-- --:--:-- --:--:--   183
+Error: Missing job details for task_name: fdl_dbjob_etl_tenant_load__deliberate_missmatch_to_test_case_7
+Processing task_name: fdl_dbjob_stateful_mirror_custom_load___deliberate_missmatch_to_test_case_7 on line 578
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    18  100    18    0     0    177      0 --:--:-- --:--:-- --:--:--   178
+Error: Missing job details for task_name: fdl_dbjob_stateful_mirror_custom_load___deliberate_missmatch_to_test_case_7
+There is no job name that exists in DBR application for this ./job_logging.py file
