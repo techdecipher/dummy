@@ -1,67 +1,382 @@
-first processing dags files
-fdl_newfile.py
-Processing file: fdl_newfile.py
-Processing tasks from output.txt
-Processing task_name: fdl_dbjob_etl_model_load_epm_fdm on line 109
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   348  100   348    0     0    916      0 --:--:-- --:--:-- --:--:--   918
-Job Value: 915798146956898
-Task Value: fdl_dbjob_etl_model_load_epm_fdm
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm on line 109 in fdl_newfile.py
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load on line 175
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   353  100   353    0     0   1404      0 --:--:-- --:--:-- --:--:--  1406
-Job Value: 327865593925918
-Task Value: fdl_dbjob_stateful_mirror_custom_load
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load on line 175 in fdl_newfile.py
-Processing task_name: fdl_dbjob_etl_model_load_epm_fdm_test2 on line 241
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   358  100   358    0     0   1392      0 --:--:-- --:--:-- --:--:--  1387
-100   358  100   358    0     0   1391      0 --:--:-- --:--:-- --:--:--  1387
-Job Value: 569877448314571
-Task Value: fdl_dbjob_etl_model_load_epm_fdm_test2
-Updating job_id for fdl_dbjob_etl_model_load_epm_fdm_test2 on line 241 in fdl_newfile.py
-Processing task_name: fdl_dbjob_stateful_mirror_custom_load_test2 on line 308
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   363  100   363    0     0   1572      0 --:--:-- --:--:-- --:--:--  1578
-Job Value: 192448730741373
-Task Value: fdl_dbjob_stateful_mirror_custom_load_test2
-Updating job_id for fdl_dbjob_stateful_mirror_custom_load_test2 on line 308 in fdl_newfile.py
-checking current directory and Syncing files to S3
-/codebuild/output/src705/src/s3/01/FDL/dags
-total 108K
--rw-rw-r-- 1 root root  171 Dec 31 08:47 users.json
--rw-rw-r-- 1 root root 9.2K Dec 31 08:47 fdl_newfile1.py
--rw-rw-r-- 1 root root  31K Dec 31 08:47 fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION_custom2.py
--rw-rw-r-- 1 root root   10 Dec 31 08:47 fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION.py
--rw-rw-r-- 1 root root  16K Dec 31 08:47 fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION_custom1.py
--rw-rw-r-- 1 root root  16K Dec 31 08:47 fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION.py
--rw-r--r-- 1 root root  170 Dec 31 08:48 output.txt
--rw-r--r-- 1 root root  363 Dec 31 08:48 apiresponse.json
--rw-r--r-- 1 root root  16K Dec 31 08:48 fdl_newfile.py
-Completed 15.7 KiB/86.6 KiB (126.4 KiB/s) with 6 file(s) remaining
-upload: ./fdl_newfile.py to s3://testairflows3poc/dags/fdl_newfile.py
-Completed 15.7 KiB/86.6 KiB (126.4 KiB/s) with 5 file(s) remaining
-Completed 45.9 KiB/86.6 KiB (287.0 KiB/s) with 5 file(s) remaining
-upload: ./fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION_custom2.py to s3://testairflows3poc/dags/fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION_custom2.py
-Completed 45.9 KiB/86.6 KiB (287.0 KiB/s) with 4 file(s) remaining
-Completed 61.6 KiB/86.6 KiB (371.3 KiB/s) with 4 file(s) remaining
-upload: ./fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION_custom1.py to s3://testairflows3poc/dags/fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION_custom1.py
-Completed 61.6 KiB/86.6 KiB (371.3 KiB/s) with 3 file(s) remaining
-Completed 77.4 KiB/86.6 KiB (461.9 KiB/s) with 3 file(s) remaining
-upload: ./fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION.py to s3://testairflows3poc/dags/fdl_dbjob_ds_po_commodity_workflow_is_GEV_CCL_FUSION.py
-Completed 77.4 KiB/86.6 KiB (461.9 KiB/s) with 2 file(s) remaining
-Completed 77.4 KiB/86.6 KiB (456.4 KiB/s) with 2 file(s) remaining
-upload: ./fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION.py to s3://testairflows3poc/dags/fdl_dbjob_tenant_master_job_pa_ebs_fusion_GEV_CCL_FUSION.py
-Completed 77.4 KiB/86.6 KiB (456.4 KiB/s) with 1 file(s) remaining
-Completed 86.6 KiB/86.6 KiB (406.4 KiB/s) with 1 file(s) remaining
-upload: ./fdl_newfile1.py to s3://testairflows3poc/dags/fdl_newfile1.py
-now processing scripts files
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      python: 3.x
+
+ 
+  build:
+    commands:
+      
+      - cd $CODEBUILD_SRC_DIR_source_artifactsDbr || exit 1
+      - echo "reading params file"
+      - PARAM_FILE="parameters.json"
+      - modified_dags_files=$(jq -r '.modified_dags_files[]' "$PARAM_FILE");
+      - modified_scripts_files=$(jq -r '.modified_scripts_files[]' "$PARAM_FILE");
+      - echo "Fetching the latest changes from the repository"
+      - cd dags/databricks/FDL/dags
+      - echo "Defining modified files manually"
+      - echo "$modified_dags_files"
+      - echo "$modified_scripts_files"
+      - |
+        if [ "$modified_dags_files" ] && [ "$modified_scripts_files" ]; then
+            echo "modified files under both dags and scripts env variable is active"
+            echo "first processing dags files"
+            echo "$modified_dags_files"
+            for python_file in $modified_dags_files; do
+              echo "Processing file: $python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
+ 
+              # Write task line numbers and task names into output.txt
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+                if [ "$task_name" ] && [ "$lineNumber" ]; then
+                
+                     echo "Processing task_name: $task_name on line $lineNumber"
+                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
+                        --request GET "URL/api/2.1/jobs/list?name=${task_name}" \
+                        --header "Authorization: Bearer TOKEN" > "apiresponse.json"
+ 
+                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                          echo "Error: Missing job details for task_name: $task_name"
+                          continue
+                     fi
+ 
+                    echo "Job Value: $job_value"
+                    echo "Task Value: $job_name"
+                     if [ "$task_name" == "$job_name" ]; then
+                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                         { print }
+                         ' "$python_file" > temp.py && mv temp.py "$python_file"
+                     else
+                         echo "No match found for $task_name and $job_name"
+                     fi
+                else
+                    echo "There is no job name that exists in DBR application for this $python_file file"
+                fi
+              done < output.txt
+              echo "Starting sync"
+              pwd
+              #if [ -f "apiresponse.json" ]; then rm apiresponse.json; fi
+              #if [ -f "output.txt" ]; then rm output.txt; fi
+              aws s3 sync . s3://testairflows3poc/dags/databricks/FDL/dags --exclude "*" --include "$python_file"
+            done
+            
+            ls -ltrh
+           
+            echo "now processing scripts files"
+            cd ..
+            pwd
+            cd scripts
+            pwd
+            echo "Script section is running"
+            echo "$modified_scripts_files"
+            for script_python_file in $modified_scripts_files; do
+              echo "Processing file: $script_python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$script_python_file" || true)
+              #this output file contains data from dags so clearing it here for fresh start for script side
+              > output.txt
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+
+                if [ "$task_name" ] && [ "$lineNumber" ]; then
+                
+                     echo "Processing task_name: $task_name on line $lineNumber"
+                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
+                        --request GET "URL/api/2.1/jobs/list?name=${task_name}" \
+                        --header "Authorization: Bearer TOKEN" > "apiresponse.json"
+ 
+                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                          echo "Error: Missing job details for task_name: $task_name"
+                          continue
+                     fi
+ 
+                    echo "Job Value: $job_value"
+                    echo "Task Value: $job_name"
+                     if [ "$task_name" == "$job_name" ]; then
+                         echo "Updating job_id for $task_name on line $lineNumber in $script_python_file"
+                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                         { print }
+                         ' "$script_python_file" > temp.py && mv temp.py "$script_python_file"
+                     else
+                         echo "No match found for $task_name and $job_name"
+                     fi
+                else
+                    echo "There is no job name that exists in DBR application for this $script_python_file file"
+                fi
+              done < output.txt
+              #if [ -f "apiresponse.json" ]; then rm apiresponse.json; fi
+              #if [ -f "output.txt" ]; then rm output.txt; fi
+              aws s3 sync . s3://testairflows3poc/dags/databricks/FDL/scripts --exclude "*" --include "$script_python_file"
+            done
+            pwd
+            
+            
+        elif [  "$modified_dags_files" ]; then
+            echo "modified files under dags only active"
+    
+            echo "$modified_dags_files"
+     
+            # Loop through each Python file and perform the tasks
+            echo "Processing each Python file"
+      
+            for python_file in $modified_dags_files; do
+              echo "Processing file: $python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
+ 
+              # Write task line numbers and task names into output.txt
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+                if [ "$task_name" ] && [ "$lineNumber" ]; then
+                
+                     echo "Processing task_name: $task_name on line $lineNumber"
+                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
+                        --request GET "URL/api/2.1/jobs/list?name=${task_name}" \
+                        --header "Authorization: Bearer TOKEN" > "apiresponse.json"
+ 
+                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                          echo "Error: Missing job details for task_name: $task_name"
+                          continue
+                     fi
+ 
+                    echo "Job Value: $job_value"
+                    echo "Task Value: $job_name"
+                     if [ "$task_name" == "$job_name" ]; then
+                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                         { print }
+                         ' "$python_file" > temp.py && mv temp.py "$python_file"
+                     else
+                         echo "No match found for $task_name and $job_name"
+                     fi
+                else
+                    echo "There is no job name that exists in DBR application for this $python_file file"
+                fi
+              done < output.txt
+              #if [ -f "apiresponse.json" ]; then rm apiresponse.json; fi
+              #if [ -f "output.txt" ]; then rm output.txt; fi
+              aws s3 sync . s3://testairflows3poc/dags/databricks/FDL/dags --exclude "*" --include "$python_file"
+            done
+    
+        elif [  "$modified_scripts_files" ]; then
+            cd ..
+            cd scripts
+            echo "Script section is running"
+            for python_file in $modified_scripts_files; do
+              echo "Processing file: $python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
+              > output.txt
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+
+                if [ "$task_name" ] && [ "$lineNumber" ]; then
+                
+                     echo "Processing task_name: $task_name on line $lineNumber"
+                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
+                        --request GET "URL/api/2.1/jobs/list?name=${task_name}" \
+                        --header "Authorization: Bearer TOKEN" > "apiresponse.json"
+ 
+                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                          echo "Error: Missing job details for task_name: $task_name"
+                          continue
+                     fi
+ 
+                    echo "Job Value: $job_value"
+                    echo "Task Value: $job_name"
+                     if [ "$task_name" == "$job_name" ]; then
+                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                         { print }
+                         ' "$python_file" > temp.py && mv temp.py "$python_file"
+                     else
+                         echo "No match found for $task_name and $job_name"
+                     fi
+                else
+                    echo "There is no job name that exists in DBR application for this $python_file file"
+                fi
+              done < output.txt
+              #if [ -f "apiresponse.json" ]; then rm apiresponse.json; fi
+              #if [ -f "output.txt" ]; then rm output.txt; fi
+              aws s3 sync . s3://testairflows3poc/dags/databricks/FDL/scripts --exclude "*" --include "$python_file"
+            done
+      
+        else
+            echo "Runing for all py files at dags directory"
+            python_files=$(find . -name "*.py")
+ 
+            #Loop through each Python file and perform the tasks
+            echo "Processing each Python file"
+            for python_file in $python_files; do
+              echo "Processing file: $python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
+ 
+              # Write task line numbers and task names into output.txt
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+                if [ "$task_name" ] && [ "$lineNumber" ]; then
+                
+                     echo "Processing task_name: $task_name on line $lineNumber"
+                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
+                        --request GET "URL/api/2.1/jobs/list?name=${task_name}" \
+                        --header "Authorization: Bearer TOKEN" > "apiresponse.json"
+ 
+                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                          echo "Error: Missing job details for task_name: $task_name"
+                          continue
+                     fi
+ 
+                    echo "Job Value: $job_value"
+                    echo "Task Value: $job_name"
+                     if [ "$task_name" == "$job_name" ]; then
+                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                         { print }
+                         ' "$python_file" > temp.py && mv temp.py "$python_file"
+                     else
+                         echo "No match found for $task_name and $job_name"
+                     fi
+                else
+                    echo "There is no job name that exists in DBR application for this $python_file"
+                fi
+              done < output.txt
+            done
+            rm -f apiresponse.json output.txt
+            ls -ltrh
+            
+            #running for all script .py files
+            cd ..
+            cd scripts
+            echo "Runing for all py files at scripts directory"
+            python_files=$(find . -name "*.py")
+            for python_file in $python_files; do
+              echo "Processing file: $python_file"
+ 
+              # Extract task_id lines from the current Python file
+              jobNames=$(grep -n "task_id='run_fdl_dbjob_" "$python_file" || true)
+              #this output file contains data from dags so clearing it here for fresh start for script side
+              > output.txt
+              while IFS= read -r line; do
+                lineNumber=$(echo "$line" | cut -d: -f1)
+                jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_//" | sed "s/',//" | xargs)
+                echo "$lineNumber $jobName" >> output.txt
+              done <<< "$jobNames"
+ 
+              # Process each task from output.txt
+              echo "Processing tasks from output.txt"
+              while IFS= read -r entry; do
+                lineNumber=$(echo "$entry" | awk '{print $1}')
+                task_name=$(echo "$entry" | awk '{print $2}')
+
+                if [ "$task_name" ] && [ "$lineNumber" ]; then
+                
+                     echo "Processing task_name: $task_name on line $lineNumber"
+                     curl   --connect-timeout 30 --retry 3 --retry-delay 5 \
+                        --request GET "URL/api/2.1/jobs/list?name=${task_name}" \
+                        --header "Authorization: Bearer TOKEN" > "apiresponse.json"
+ 
+                     job_value=$(jq -r '.jobs[0].job_id // empty' "apiresponse.json")
+                     job_name=$(jq -r '.jobs[0].settings.name // empty' "apiresponse.json")
+                     if [ -z "$job_value" ] || [ -z "$job_name" ]; then
+                          echo "Error: Missing job details for task_name: $task_name"
+                          continue
+                     fi
+ 
+                    echo "Job Value: $job_value"
+                    echo "Task Value: $job_name"
+                     if [ "$task_name" == "$job_name" ]; then
+                         echo "Updating job_id for $task_name on line $lineNumber in $python_file"
+                         awk -v lineNum="$lineNumber" -v jobVal="$job_value" '
+                         NR==lineNum+1 { sub(/job_id[[:space:]]*=.*/, "job_id=" jobVal ","); }
+                         { print }
+                         ' "$python_file" > temp.py && mv temp.py "$python_file"
+                     else
+                         echo "No match found for $task_name and $job_name"
+                     fi
+                else
+                    echo "There is no job name that exists in DBR application for this $python_file file"
+                fi
+              done < output.txt
+            done
+            rm -f apiresponse.json output.txt
+ 
+            # Sync the updated files to S3
+            echo "checking current directory and Syncing files to S3"
+            cd ..
+            
+            pwd
+            ls -ltrh
+            aws s3 sync ./ s3://testairflows3poc/dags/databricks/FDL --delete
+            
+            
+        fi
