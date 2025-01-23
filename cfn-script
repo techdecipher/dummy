@@ -1,0 +1,205 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AWS CloudFormation template to Create a CodePipeline for Dev Environment
+
+Parameters:
+  Namespace:
+    Description: "A prefix used to name provisioned resources"
+    Type: "String"
+    
+  BuildSpec:
+    Description: "Used for buildspec.yaml specification" 
+    Type: "String"
+    
+  Env:
+    Description: Used for env specification 
+    Type: "String"
+    
+  S3BucketNameArtifacts:
+    Description: "The S3 artifacts bucket name, e.g. artifacts.example.com"
+    Type: "String"
+    
+  S3KeyNameSource:
+    Description: "The S3 source key name, e.g. source.zip"
+    Type: "String"
+    Default: source.zip
+    
+  RepositoryType:
+    Description: "The repository type, e.g. GITHUB"
+    Type: "String"
+    Default: GITHUB_ENTERPRISE
+    
+  CodeBuildServiceRole:
+    Description: "The CodeBuild service role"
+    Type: "String"
+    
+  CodeBuildSg:
+    Description: "The CodeBuild security group"
+    Type: "String"
+    
+  CodeBuildSubnet:
+    Description: "The CodeBuild subnet"
+    Type: "String"
+    
+  CodeBuildVpc:
+    Description: "The CodeBuild VPC"
+    Type: "String"
+    
+  KmsKey:
+    Description: "The CodeBuild KMS key for build artifacts"
+    Type: "String"
+    
+  CodePipelineServiceRole:
+    Description: "The CodePipeline service role"
+    Type: "String"
+    
+  ConnectionArnOrgVernovaGpDbr:
+    Description: "The ConnectionArn"
+    Type: "String"
+    
+  BranchName:
+    Description: "The BranchName uses the branch"
+    Type: "String"
+    
+  Pipelinebranch:
+    Description: "The Pipelinebranch uses the devops branch"
+    Type: "String"
+          
+  
+####################################### repo  ################################################
+  
+  FullRepositoryIdDbrMaster:
+    Description: "The name of the RepositoryId" 
+    Type: "String"
+
+  
+
+  
+  FullRepositoryIdDbrRepo:
+    Description: "The name of the RepositoryId" 
+    Type: "String"
+    
+
+    
+################################################ Resources ##################################################################
+     
+############################################# Pipeline For Repo ############################################
+  
+Resources:
+  SourceCodeBuildProject:
+    Type: "AWS::CodeBuild::Project"
+    Properties:
+      Name: !Sub ${Namespace}-platform${Env}build
+      Description: CodeBuild project to trigger build and save initial set of artifacts
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Ref BuildSpec
+            
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:4.0
+        Type: "LINUX_CONTAINER"
+        
+      ServiceRole: !Ref CodeBuildServiceRole
+      VpcConfig:
+        SecurityGroupIds: 
+          - !Ref CodeBuildSg
+        Subnets: 
+          - !Ref CodeBuildSubnet
+        VpcId: !Ref CodeBuildVpc
+      Artifacts:
+        Type: CODEPIPELINE
+      EncryptionKey: !Ref KmsKey
+
+  AppPipeline:
+    Type: "AWS::CodePipeline::Pipeline"
+    Properties:
+      Name: !Sub ${Namespace}-platform${Env}pipeline
+      ArtifactStore:
+        Location: !Ref S3BucketNameArtifacts
+        Type: 'S3'
+      RoleArn: !Ref CodePipelineServiceRole
+      
+          
+      Stages:
+        - Name: Source-Stage
+          Actions:
+            - Name: Build-Source
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Version: '1'
+                Provider: CodeStarSourceConnection
+              
+              Configuration:
+                ConnectionArn: !Ref ConnectionArnOrgVernovaGpDbr
+                FullRepositoryId: !Ref FullRepositoryIdDbrMaster
+                BranchName: !Ref Pipelinebranch
+                OutputArtifactFormat: "CODE_ZIP"
+                
+              OutputArtifacts:
+                - Name: 'source_artifacts'
+              RunOrder: 1
+              
+       
+            - Name: Databricks-Source
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Version: '1'
+                Provider: CodeStarSourceConnection
+              Configuration:
+                ConnectionArn: !Ref ConnectionArnOrgVernovaGpDbr
+                FullRepositoryId: !Ref FullRepositoryIdDbrRepo
+                BranchName: !Ref BranchName
+                OutputArtifactFormat: "CODE_ZIP"
+              OutputArtifacts:
+                - Name: 'source_artifactsDbr'
+              RunOrder: 1
+
+        - Name: Build_Deploy
+          Actions:
+            - Name: Build-Artifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Sub ${Namespace}-platform${Env}build
+                PrimarySource: 'source_artifacts'
+                
+              InputArtifacts:
+                - Name: 'source_artifacts'
+                - Name: 'source_artifactsDbr'
+             
+              OutputArtifacts:
+                - Name: 'build_artifacts'
+              RunOrder: 1 
+              
+     
+      Triggers: 
+        - ProviderType: CodeStarSourceConnection
+          GitConfiguration:
+            SourceActionName: Build-Source   
+            PullRequest:
+              - Branches:
+                  Excludes:
+                    - main
+                    - dev
+                    - devops-pipeline
+                Events:
+                  - CLOSED
+
+        - ProviderType: CodeStarSourceConnection
+          GitConfiguration:
+            SourceActionName: Databricks-Source
+            Push:
+              - Branches:
+                  Includes:
+                    - dev
+                FilePaths:
+                  Excludes:
+                    - '.github/CODEOWNERS'
+        
+            
+      PipelineType: V2 
