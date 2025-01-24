@@ -1,0 +1,88 @@
+[Container] 2025/01/24 13:05:39.618271 Running on CodeBuild On-demand
+[Container] 2025/01/24 13:05:39.618289 Waiting for agent ping
+[Container] 2025/01/24 13:05:39.920051 Waiting for DOWNLOAD_SOURCE
+[Container] 2025/01/24 13:05:41.524397 Phase is DOWNLOAD_SOURCE
+[Container] 2025/01/24 13:05:41.621890 CODEBUILD_SRC_DIR=/codebuild/output/src4165584951/src
+[Container] 2025/01/24 13:05:41.622378 YAML location is /codebuild/readonly/buildspec.yml
+[Container] 2025/01/24 13:05:41.625749 Setting HTTP client timeout to higher timeout for S3 source
+[Container] 2025/01/24 13:05:41.625863 Processing environment variables
+[Container] 2025/01/24 13:05:41.892406 No runtime version selected in buildspec.
+[Container] 2025/01/24 13:05:41.920094 Moving to directory /codebuild/output/src4165584951/src
+[Container] 2025/01/24 13:05:41.923275 Unable to initialize cache download: no paths specified to be cached
+[Container] 2025/01/24 13:05:42.020469 Configuring ssm agent with target id: codebuild:e5a86be3-3cf2-4483-a670-a37d07e4bd0d
+[Container] 2025/01/24 13:05:42.055342 Successfully updated ssm agent configuration
+[Container] 2025/01/24 13:05:42.055790 Registering with agent
+[Container] 2025/01/24 13:05:42.187064 Phases found in YAML: 1
+[Container] 2025/01/24 13:05:42.187087  PRE_BUILD: 8 commands
+[Container] 2025/01/24 13:05:42.187415 Phase complete: DOWNLOAD_SOURCE State: SUCCEEDED
+[Container] 2025/01/24 13:05:42.187432 Phase context status code:  Message: 
+[Container] 2025/01/24 13:05:42.346622 Entering phase INSTALL
+[Container] 2025/01/24 13:05:42.460590 Phase complete: INSTALL State: SUCCEEDED
+[Container] 2025/01/24 13:05:42.460610 Phase context status code:  Message: 
+[Container] 2025/01/24 13:05:42.497751 Entering phase PRE_BUILD
+[Container] 2025/01/24 13:05:42.616980 Running command echo "Starting pre-build phase..."
+Starting pre-build phase...
+
+[Container] 2025/01/24 13:05:42.623094 Running command GITHUB_API_URL="https://api.github.com"
+REPO_OWNER="techdecipher"
+REPO_NAME="dummy"
+GITHUB_PAT="$GITHUB_PAT"
+
+
+[Container] 2025/01/24 13:05:42.628724 Running command echo "Fetching latest commit SHA from GitHub..."
+Fetching latest commit SHA from GitHub...
+
+[Container] 2025/01/24 13:05:42.634237 Running command LATEST_COMMIT_SHA=$(curl -s -H "Authorization: token $GITHUB_PAT" \
+  "$GITHUB_API_URL/repos/$REPO_OWNER/$REPO_NAME/commits?per_page=1" | jq -r '.[0].sha')
+echo "Latest commit SHA: $LATEST_COMMIT_SHA"
+
+Latest commit SHA: 61da735aa900ac157b49e1e7b1f04df4e35e5ef5
+
+[Container] 2025/01/24 13:05:43.248031 Running command echo "Checking which branch contains the latest commit..."
+Checking which branch contains the latest commit...
+
+[Container] 2025/01/24 13:05:43.253986 Running command UPDATED_BRANCH=$(curl -s -H "Authorization: token $GITHUB_PAT" \
+  "$GITHUB_API_URL/repos/$REPO_OWNER/$REPO_NAME/branches" | \
+  jq -r --arg sha "$LATEST_COMMIT_SHA" '.[] | select(.commit.sha == $sha) | .name')
+
+
+[Container] 2025/01/24 13:05:43.408683 Running command echo "Branch that was updated $UPDATED_BRANCH"
+Branch that was updated main
+
+[Container] 2025/01/24 13:05:43.414454 Running command if [ "$UPDATED_BRANCH" = "dev" ]; then
+  echo "Changes detected in DEV branch, running deployment...";
+elif [ "$UPDATED_BRANCH" = "main" ]; then
+  echo "Changes detected in MAIN branch, running deployment...";
+else
+  echo "Unknown branch detected, exiting...";
+  exit 1;
+fi
+
+Changes detected in MAIN branch, running deployment...
+
+[Container] 2025/01/24 13:05:43.420196 Phase complete: PRE_BUILD State: SUCCEEDED
+[Container] 2025/01/24 13:05:43.420214 Phase context status code:  Message: 
+[Container] 2025/01/24 13:05:43.461296 Entering phase BUILD
+[Container] 2025/01/24 13:05:43.463234 Phase complete: BUILD State: SUCCEEDED
+[Container] 2025/01/24 13:05:43.463249 Phase context status code:  Message: 
+[Container] 2025/01/24 13:05:43.501187 Entering phase POST_BUILD
+[Container] 2025/01/24 13:05:43.502807 Phase complete: POST_BUILD State: SUCCEEDED
+[Container] 2025/01/24 13:05:43.502819 Phase context status code:  Message: 
+[Container] 2025/01/24 13:05:43.675110 Expanding base directory path: .
+[Container] 2025/01/24 13:05:43.678486 Assembling file list
+[Container] 2025/01/24 13:05:43.678498 Expanding .
+[Container] 2025/01/24 13:05:43.681872 Expanding file paths for base directory .
+[Container] 2025/01/24 13:05:43.681885 Assembling file list
+[Container] 2025/01/24 13:05:43.681888 Expanding **/*
+[Container] 2025/01/24 13:05:43.685324 Found 11 file(s)
+[Container] 2025/01/24 13:05:43.689043 Set report auto-discover timeout to 5 seconds
+[Container] 2025/01/24 13:05:43.689092 Expanding base directory path:  .
+[Container] 2025/01/24 13:05:43.692325 Assembling file list
+[Container] 2025/01/24 13:05:43.692338 Expanding .
+[Container] 2025/01/24 13:05:43.695626 Expanding file paths for base directory .
+[Container] 2025/01/24 13:05:43.695640 Assembling file list
+[Container] 2025/01/24 13:05:43.695643 Expanding **/*
+[Container] 2025/01/24 13:05:43.699028 No matching auto-discover report paths found
+[Container] 2025/01/24 13:05:43.699053 Report auto-discover file discovery took 0.010011 seconds
+[Container] 2025/01/24 13:05:43.699069 Phase complete: UPLOAD_ARTIFACTS State: SUCCEEDED
+[Container] 2025/01/24 13:05:43.699079 Phase context status code:  Message: 
