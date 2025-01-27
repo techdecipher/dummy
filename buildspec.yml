@@ -1,88 +1,38 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      python: 3.x
+  pre_build:
     commands:
-      - pip install --upgrade pip
-      - pip install requests
-  build:
-    commands:
-      - echo "Downloading test_file.py from S3"
-      - aws s3 cp s3://my-test-job-files/test_file.py ./test_file.py
+      - echo "Starting pre-build phase..."
 
-      - echo "Creating the Python script inline"
+      # Define variables
       - |
-        cat <<EOF > update_job_ids.py
-        import os
-        import requests
-        import re
+        GITHUB_API_URL="https://api.github.com"
+        ORG_NAME="your-org-name"
+        GITHUB_PAT="$GITHUB_PAT"
+        PER_PAGE=100  # Number of results per page
+        PAGE=1
+        ALL_MEMBERS=""
 
-        def login(token):
-            headers = {'Authorization': f'Bearer {token}'}
-            return headers
+      # Fetch all members across multiple pages
+      - |
+        while true; do
+          RESPONSE=$(curl -s -H "Authorization: token $GITHUB_PAT" \
+              "$GITHUB_API_URL/orgs/$ORG_NAME/members?page=$PAGE&per_page=$PER_PAGE")
 
-        def list_jobs(base_url, headers):
-            response = requests.get(f'{base_url}/api/2.1/jobs/list', headers=headers)
-            response.raise_for_status()
-            jobs = response.json().get('jobs', [])
-            return jobs
+          # Check if response is empty or error occurred
+          if [ -z "$RESPONSE" ] || [ "$RESPONSE" == "[]" ]; then
+            break
+          fi
 
-        def update_job_id_in_dag(filepath, jobs):
-            with open(filepath, 'r') as file:
-                lines = file.readlines()
+          MEMBERS=$(echo "$RESPONSE" | jq -r '.[].login')
+          if [ -n "$MEMBERS" ]; then
+            ALL_MEMBERS+="$MEMBERS"$'\n'
+          fi
 
-            task_pattern = re.compile(r'task_id="run_(.*?)"')
-            job_id_pattern = re.compile(r'job_id=.*?,')
+          echo "Fetched page $PAGE"
+          ((PAGE++))
+        done
 
-            for i, line in enumerate(lines):
-                task_match = task_pattern.search(line)
-                if task_match:
-                    job_name = task_match.group(1)
-                    job_id = None
-                    for job in jobs:
-                        if job['settings']['name'] == job_name:
-                            job_id = job['job_id']
-                            break
-                    if job_id:
-                        for j in range(i + 1, min(i + 5, len(lines))):
-                            if 'job_id=' in lines[j]:
-                                lines[j] = job_id_pattern.sub(f'job_id={job_id},', lines[j])
-                                print(f'Updated job_id for {job_name} to {job_id}')
-                                break
-                    else:
-                        print(f'Warning: Job ID not found for {job_name}')
-
-            with open(filepath, 'w') as file:
-                file.writelines(lines)
-
-        def main():
-            DATABRICKS_TOKEN = os.environ.get('DATABRICKS_TOKEN')
-            DATABRICKS_URL = os.environ.get('DATABRICKS_URL')
-            FILE_PATH = './test_file.py'
-
-            if not DATABRICKS_TOKEN or not DATABRICKS_URL:
-                print('Error: DATABRICKS_TOKEN or DATABRICKS_URL not set')
-                return
-
-            headers = login(DATABRICKS_TOKEN)
-            jobs = list_jobs(DATABRICKS_URL, headers)
-            update_job_id_in_dag(FILE_PATH, jobs)
-
-        if __name__ == '__main__':
-            main()
-        EOF
-
-      - echo "Updating job IDs in test_file.py"
-      - export DATABRICKS_TOKEN="secrete"
-      - export DATABRICKS_URL="URL"
-
-      - python update_job_ids.py
-
-      - echo "Uploading the updated test_file.py back to S3"
-      - aws s3 cp ./test_file.py s3://my-test-job-files/updated_test_file.py
-
-  post_build:
-    commands:
-      - echo "Build completed successfully."
+      - echo "All members fetched:"
+      - echo "$ALL_MEMBERS"
