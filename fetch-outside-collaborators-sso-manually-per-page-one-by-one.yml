@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Starting pre-build phase..."
+
+      # Define variables
+      - |
+        GITHUB_API_URL="https://github.build.ge.com/api/v3"
+        REPO_OWNER="vernova-gp-dbr"
+        GITHUB_PAT="$GITHUB_PAT"
+
+      - |
+        PAGE=3
+          
+        Outside_Collaborators=$(curl -s -H "Authorization: token $GITHUB_PAT" \
+        "$GITHUB_API_URL/orgs/$REPO_OWNER/outside_collaborators?page=$PAGE" | jq -r '.[].login')
+
+      - echo "$Outside_Collaborators"

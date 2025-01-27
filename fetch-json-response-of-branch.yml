@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Starting pre-build phase..."
+
+      # Define variables
+      - |
+        GITHUB_API_URL="https://github.build.ge.com/api/v3"
+        REPO_OWNER="vernova-gp-dbr"
+        REPO_NAME="GP_PLATFORM_DBR"
+        GITHUB_PAT="$GITHUB_PAT"
+        INNOV_BRANCH="innov"
+        QA_INNOV_BRANCH="qa-innov"
+
+      # Get latest commit timestamps for both branches
+      - echo "Fetching the json response for the branch for the further troublshooting..."
+      - |
+         curl -s -H "Authorization: token $GITHUB_PAT" \
+         "$GITHUB_API_URL/repos/$REPO_OWNER/$REPO_NAME/branches/$INNOV_BRANCH" | jq
+
+
+
+

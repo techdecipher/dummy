@@ -1,0 +1,38 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Starting pre-build phase..."
+
+      # Define variables
+      - |
+        GITHUB_API_URL="https://github.build.ge.com/api/v3"
+        REPO_OWNER="vernova-gp-dbr"
+        REPO_NAME="GP_PLATFORM_DBR"
+        GITHUB_PAT="$GITHUB_PAT"
+        INNOV_BRANCH="innov"
+        QA_INNOV_BRANCH="qa_innov"
+
+      # Get latest commit timestamps for both branches
+      - echo "Fetching latest commit timestamps..."
+    
+      - |
+        INNOV_COMMIT_TIME=$(curl -s -H "Authorization: token $GITHUB_PAT" \
+        "$GITHUB_API_URL/repos/$REPO_OWNER/$REPO_NAME/branches/$INNOV_BRANCH" | jq -r '.commit.commit.author.date')
+        
+        QA_INNOV_COMMIT_TIME=$(curl -s -H "Authorization: token $GITHUB_PAT" \
+        "$GITHUB_API_URL/repos/$REPO_OWNER/$REPO_NAME/branches/$QA_INNOV_BRANCH" | jq -r '.commit.commit.author.date')
+        
+        echo "$INNOV_COMMIT_TIME"
+        echo "$QA_INNOV_COMMIT_TIME"
+
+    
+      - |
+        if [[ "$QA_INNOV_COMMIT_TIME" > "$INNOV_COMMIT_TIME" ]]; then
+          echo "Latest updates found in QA-innov branch."
+          echo "deploy in QA-innov branch"
+        else
+          echo "Latest updates found in innov branch."
+          echo "deploy in innov branch"
+        fi
