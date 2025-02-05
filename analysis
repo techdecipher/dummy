@@ -1,7 +1,40 @@
-{
-  "source": ["aws.cloudtrail"],
-  "detail-type": ["AWS API Call via CloudTrail"],
-  "detail": {
-    "eventName": ["UpdateStack", "DeleteStack", "ModifyResource"]
-  }
-}
+import boto3
+import json
+import re
+
+def lambda_handler(event, context):
+    """Handles CloudTrail log events & extracts user and action details."""
+    print("🔍 Received Event:", json.dumps(event, indent=2))  # Log full event for debugging
+    
+    # ✅ Step 1: Extract API action
+    event_name = event["detail"].get("eventName", "UNKNOWN_EVENT")
+    print(f"📌 Event Detected: {event_name}")
+
+    # ✅ Step 2: Extract user details (Who made the change?)
+    user_identity = event["detail"].get("userIdentity", {})
+    user_email = extract_user_email(user_identity)
+    if user_email:
+        print(f"👤 Change Made By: {user_email}")
+    else:
+        print("⚠️ Could not extract user email")
+
+    # ✅ Step 3: Extract affected stack/resource
+    resource_arn = event["detail"].get("requestParameters", {}).get("stackName")  # Change if needed
+    if resource_arn:
+        print(f"🏗️ Resource Modified: {resource_arn}")
+    else:
+        print("⚠️ No stack/resource name found")
+
+    return {
+        "statusCode": 200,
+        "body": json.dumps(f"Detected change by {user_email} on {resource_arn}")
+    }
+
+def extract_user_email(user_identity):
+    """Extracts 9-digit SSO from user identity and returns email."""
+    username = user_identity.get("userName") or user_identity.get("arn", "").split("/")[-1]
+    match = re.search(r"\b\d{9}\b", username)
+    if match:
+        sso = match.group()
+        return f"{sso}@company.com"
+    return None
