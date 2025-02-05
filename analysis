@@ -1,60 +1,7 @@
-2025-02-05T10:58:07.826Z
-INIT_START Runtime Version: python:3.11.v46 Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:84bc5fe9641102b252ebbfd80d16f2791f7bcca59e26ce68d95066317adf4503
-2025-02-05T10:58:08.212Z
-START RequestId: 6217af98-3585-405d-8c3b-202e986af15c Version: $LATEST
-2025-02-05T10:58:08.213Z
-Lambda triggered with event: {
-2025-02-05T10:58:08.213Z
-"version": "0",
-2025-02-05T10:58:08.213Z
-"id": "f23fa795-7479-ec38-ab26-ff474dd7f8ea",
-2025-02-05T10:58:08.213Z
-"detail-type": "CloudFormation Drift Detection Status Change",
-2025-02-05T10:58:08.213Z
-"source": "aws.cloudformation",
-2025-02-05T10:58:08.213Z
-"account": "158366596870",
-2025-02-05T10:58:08.213Z
-"time": "2025-02-05T10:58:06Z",
-2025-02-05T10:58:08.213Z
-"region": "us-east-1",
-2025-02-05T10:58:08.213Z
-"resources": [
-2025-02-05T10:58:08.213Z
-"arn:aws:cloudformation:us-east-1:158366596870:stack/gev-gp-af-platform-cft-pipeline/d34f9440-5fb2-11ef-92c4-0e45891c840f"
-2025-02-05T10:58:08.213Z
-],
-2025-02-05T10:58:08.213Z
-"detail": {
-2025-02-05T10:58:08.213Z
-"stack-id": "arn:aws:cloudformation:us-east-1:158366596870:stack/gev-gp-af-platform-cft-pipeline/d34f9440-5fb2-11ef-92c4-0e45891c840f",
-2025-02-05T10:58:08.213Z
-"stack-drift-detection-id": "13f72d10-e3b0-11ef-abc4-12ecab1b499b",
-2025-02-05T10:58:08.213Z
-"status-details": {
-2025-02-05T10:58:08.213Z
-"stack-drift-status": "DRIFTED",
-2025-02-05T10:58:08.213Z
-"detection-status": "DETECTION_COMPLETE"
-2025-02-05T10:58:08.213Z
-},
-2025-02-05T10:58:08.213Z
-"drift-detection-details": {
-2025-02-05T10:58:08.213Z
-"drifted-stack-resource-count": 1
-2025-02-05T10:58:08.213Z
+{
+  "source": ["aws.cloudtrail"],
+  "detail-type": ["AWS API Call via CloudTrail"],
+  "detail": {
+    "eventName": ["UpdateStack", "DeleteStack", "ModifyResource"]
+  }
 }
-2025-02-05T10:58:08.213Z
-}
-2025-02-05T10:58:08.213Z
-}
-2025-02-05T10:58:08.213Z
-Extracted Stack Name: gev-gp-af-platform-cft-pipeline
-2025-02-05T10:58:08.489Z
-Found User: 503429410, Email: 503429410@ge.com
-2025-02-05T10:58:08.489Z
-Detected User Email: 503429410@ge.com
-2025-02-05T10:58:08.502Z
-END RequestId: 6217af98-3585-405d-8c3b-202e986af15c
-2025-02-05T10:58:08.502Z
-REPORT RequestId: 6217af98-3585-405d-8c3b-202e986af15c Duration: 290.00 ms Billed Duration: 290 ms Memory Size: 128 MB Max Memory Used: 80 MB Init Duration: 385
