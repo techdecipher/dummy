@@ -4,14 +4,10 @@ import re
 import os
 
 # AWS Clients
-ses = boto3.client("ses")  # AWS Simple Email Service
 cloudtrail = boto3.client("cloudtrail")
 
-# Environment Variables
-SES_SENDER_EMAIL = os.environ["SES_SENDER_EMAIL"]  # Must be verified in SES
-
 def lambda_handler(event, context):
-    """Handles CloudFormation Drift Detection event, finds user, and sends email."""
+    """Handles CloudFormation Drift Detection event and prints detected user email."""
     print("Lambda triggered with event:", json.dumps(event, indent=2))  # Debugging print
 
     # ✅ Step 1: Validate the event (Only process drifted stacks)
@@ -31,13 +27,13 @@ def lambda_handler(event, context):
     # ✅ Step 3: Get User from CloudTrail
     user_email = get_user_from_cloudtrail(stack_name)
     if not user_email:
-        print(f"No user found for stack {stack_name}. Skipping email.")
+        print(f"No user found for stack {stack_name}.")
         return {"statusCode": 200, "body": f"No user found for {stack_name}"}
 
-    # ✅ Step 4: Send Email Notification
-    send_email(user_email, stack_name)
+    # ✅ Step 4: Print the detected user email (No email sent yet)
+    print(f"✅ Detected User Email: {user_email}")
 
-    return {"statusCode": 200, "body": f"Drift notification sent to {user_email}"}
+    return {"statusCode": 200, "body": f"Detected user email: {user_email}"}
 
 def get_user_from_cloudtrail(stack_name):
     """Fetches the IAM user who modified the given CloudFormation stack."""
@@ -59,7 +55,7 @@ def get_user_from_cloudtrail(stack_name):
             if match:
                 sso = match.group()
                 email = f"{sso}@company.com"
-                print(f"Found User: {sso}, Email: {email}")
+                print(f"✅ Found User SSO: {sso}, Email: {email}")
                 return email
 
         print("No valid user found in CloudTrail events.")
@@ -68,22 +64,3 @@ def get_user_from_cloudtrail(stack_name):
     except Exception as e:
         print(f"Error retrieving user from CloudTrail: {e}")
         return None
-
-def send_email(user_email, stack_name):
-    """Sends an email notification via AWS SES."""
-    subject = "⚠️ CloudFormation Stack Drift Alert"
-    body = f"Hello,\n\nYour CloudFormation stack '{stack_name}' has drifted from its expected configuration.\n\nPlease review and fix the drift."
-
-    try:
-        ses.send_email(
-            Source=SES_SENDER_EMAIL,
-            Destination={"ToAddresses": [user_email]},
-            Message={
-                "Subject": {"Data": subject},
-                "Body": {"Text": {"Data": body}}
-            }
-        )
-        print(f"Email sent to {user_email}")
-
-    except Exception as e:
-        print(f"Error sending email: {e}")
