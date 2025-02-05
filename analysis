@@ -1,40 +1,33 @@
-import boto3
-import json
-import re
+No older events at this moment. 
+Retry
+2025-02-05T14:58:25.087Z
+INIT_START Runtime Version: python:3.11.v46 Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:84bc5fe9641102b252ebbfd80d16f2791f7bcca59e26ce68d95066317adf4503
+2025-02-05T14:58:25.377Z
+START RequestId: 4b9d126c-d7bc-4721-a777-e984d23a27de Version: $LATEST
+2025-02-05T14:58:25.377Z
+Received Event: {
 
-def lambda_handler(event, context):
-    """Handles CloudTrail log events & extracts user and action details."""
-    print("🔍 Received Event:", json.dumps(event, indent=2))  # Log full event for debugging
-    
-    # ✅ Step 1: Extract API action
+Received Event: {
+2025-02-05T14:58:25.377Z
+"key1": "value1",
+2025-02-05T14:58:25.377Z
+"key2": "value2",
+2025-02-05T14:58:25.377Z
+"key3": "value3"
+2025-02-05T14:58:25.377Z
+}
+2025-02-05T14:58:25.396Z
+LAMBDA_WARNING: Unhandled exception. The most likely cause is an issue in the function code. However, in rare cases, a Lambda runtime update can cause unexpected function behavior. For functions using managed runtimes, runtime updates can be triggered by a function change, or can be applied automatically. To determine if the runtime has been updated, check the runtime version in the INIT_START log entry. If this error correlates with a change in the runtime version, you may be able to mitigate this error by temporarily rolling back to the previous runtime version. For more information, see https://docs.aws.amazon.com/lambda/latest/dg/runtimes-update.html
+
+LAMBDA_WARNING: Unhandled exception. The most likely cause is an issue in the function code. However, in rare cases, a Lambda runtime update can cause unexpected function behavior. For functions using managed runtimes, runtime updates can be triggered by a function change, or can be applied automatically. To determine if the runtime has been updated, check the runtime version in the INIT_START log entry. If this error correlates with a change in the runtime version, you may be able to mitigate this error by temporarily rolling back to the previous runtime version. For more information, see https://docs.aws.amazon.com/lambda/latest/dg/runtimes-update.html
+2025-02-05T14:58:25.396Z
+[ERROR] KeyError: 'detail'
+Traceback (most recent call last):
+  File "/var/task/lambda_function.py", line 10, in lambda_handler
     event_name = event["detail"].get("eventName", "UNKNOWN_EVENT")
-    print(f"📌 Event Detected: {event_name}")
 
-    # ✅ Step 2: Extract user details (Who made the change?)
-    user_identity = event["detail"].get("userIdentity", {})
-    user_email = extract_user_email(user_identity)
-    if user_email:
-        print(f"👤 Change Made By: {user_email}")
-    else:
-        print("⚠️ Could not extract user email")
-
-    # ✅ Step 3: Extract affected stack/resource
-    resource_arn = event["detail"].get("requestParameters", {}).get("stackName")  # Change if needed
-    if resource_arn:
-        print(f"🏗️ Resource Modified: {resource_arn}")
-    else:
-        print("⚠️ No stack/resource name found")
-
-    return {
-        "statusCode": 200,
-        "body": json.dumps(f"Detected change by {user_email} on {resource_arn}")
-    }
-
-def extract_user_email(user_identity):
-    """Extracts 9-digit SSO from user identity and returns email."""
-    username = user_identity.get("userName") or user_identity.get("arn", "").split("/")[-1]
-    match = re.search(r"\b\d{9}\b", username)
-    if match:
-        sso = match.group()
-        return f"{sso}@company.com"
-    return None
+[ERROR] KeyError: 'detail' Traceback (most recent call last):   File "/var/task/lambda_function.py", line 10, in lambda_handler     event_name = event["detail"].get("eventName", "UNKNOWN_EVENT")
+2025-02-05T14:58:25.417Z
+END RequestId: 4b9d126c-d7bc-4721-a777-e984d23a27de
+2025-02-05T14:58:25.417Z
+REPORT RequestId: 4b9d126c-d7bc-4721-a777-e984d23a27de Duration: 21.36 ms Billed Duration: 22 ms Memory Size: 128 MB Max Memory Used: 62 MB Init Duration: 289.7
