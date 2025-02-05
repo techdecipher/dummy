@@ -1,56 +1,23 @@
-version: 0.2
+import boto3
+import json
 
-phases:
-  pre_build:
-    commands:
-      - echo "Starting pre-build phase..."
+cloudformation = boto3.client("cloudformation")
 
-      # Define variables
-      - |
-        GITHUB_API_URL="https://api.github.com"
-        REPO_OWNER="techdecipher"
-        REPO_NAME="dummy"
-        GITHUB_PAT="$GITHUB_PAT"
-        MAIN_BRANCH="main"
-        DEV_BRANCH="dev"
+def lambda_handler(event, context):
+    """Triggers drift detection for a CloudFormation stack when it's updated or created."""
+    print("Received event:", json.dumps(event, indent=2))
 
-      # Get latest commit timestamps for both branches
-      - echo "Fetching latest commit timestamps..."
-      - |
-        MAIN_COMMIT_TIME=$(curl -s -H "Authorization: token $GITHUB_PAT" \
-          "$GITHUB_API_URL/repos/$REPO_OWNER/$REPO_NAME/branches/$MAIN_BRANCH" | jq -r '.commit.commit.author.date')
+    # Extract stack ID from event
+    stack_id = event["detail"]["stack-id"]
+    
+    try:
+        # Start drift detection
+        response = cloudformation.detect_stack_drift(StackName=stack_id)
+        print(f"Drift detection started for stack: {stack_id}")
+        print("Drift Detection Response:", response)
 
-        DEV_COMMIT_TIME=$(curl -s -H "Authorization: token $GITHUB_PAT" \
-          "$GITHUB_API_URL/repos/$REPO_OWNER/$REPO_NAME/branches/$DEV_BRANCH" | jq -r '.commit.commit.author.date')
+        return {"statusCode": 200, "body": f"Drift detection started for {stack_id}"}
 
-        echo "Main branch last commit time: $MAIN_COMMIT_TIME"
-        echo "Dev branch last commit time: $DEV_COMMIT_TIME"
-
-      # Compare timestamps and determine the latest updated branch
-      - |
-        if [[ "$DEV_COMMIT_TIME" > "$MAIN_COMMIT_TIME" ]]; then
-          echo "Latest updates found in DEV branch."
-          DEPLOY_BRANCH=$DEV_BRANCH
-        else
-          echo "Latest updates found in MAIN branch."
-          DEPLOY_BRANCH=$MAIN_BRANCH
-        fi
-
-      - echo "Deploying branch $DEPLOY_BRANCH"
-      - export DEPLOY_BRANCH
-
-  build:
-    commands:
-      - echo "Starting build phase..."
-      - |
-        if [ "$DEPLOY_BRANCH" = "$DEV_BRANCH" ]; then
-          echo "Deploying DEV branch changes..."
-          # Add deployment steps for DEV here
-        elif [ "$DEPLOY_BRANCH" = "$MAIN_BRANCH" ]; then
-          echo "Deploying MAIN branch changes..."
-          # Add deployment steps for MAIN here
-        fi
-
-artifacts:
-  files:
-    - '**/*'
+    except Exception as e:
+        print("Error starting drift detection:", str(e))
+        return {"statusCode": 500, "body": "Failed to start drift detection"}
