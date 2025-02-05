@@ -7,11 +7,11 @@ import os
 cloudtrail = boto3.client("cloudtrail")
 
 def lambda_handler(event, context):
-    """Handles CloudFormation Drift Detection event, finds user, and logs it."""
+    """Handles CloudFormation Drift Detection event and finds user."""
     print("Lambda triggered with event:", json.dumps(event, indent=2))  # Debugging print
 
     # ✅ Step 1: Validate the event (Only process drifted stacks)
-    if event["detail"].get("stack-drift-status") != "DRIFTED":
+    if event["detail"].get("status-details", {}).get("stack-drift-status") != "DRIFTED":
         print("No drift detected. Exiting.")
         return {"statusCode": 200, "body": "No drift detected"}
 
@@ -30,16 +30,18 @@ def lambda_handler(event, context):
         print(f"No user found for stack {stack_name}. Skipping email.")
         return {"statusCode": 200, "body": f"No user found for {stack_name}"}
 
-    # ✅ Log Detected User Instead of Sending Email
-    print(f"🔎 Drift detected by: {user_email}")
+    # ✅ Step 4: Just Print User Instead of Sending Email
+    print(f"Detected User Email: {user_email}")
 
-    return {"statusCode": 200, "body": f"Drift detected by: {user_email}"}
+    return {"statusCode": 200, "body": f"Detected User Email: {user_email}"}
 
 def get_user_from_cloudtrail(stack_name):
     """Fetches the IAM user who modified the given CloudFormation stack."""
     try:
         response = cloudtrail.lookup_events(
-            LookupAttributes=[{"AttributeKey": "EventName", "AttributeValue": "UpdateStack"}],
+            LookupAttributes=[
+                {"AttributeKey": "EventName", "AttributeValue": "UpdateStack"}
+            ],
             MaxResults=5  # Fetch recent events
         )
         
@@ -53,7 +55,7 @@ def get_user_from_cloudtrail(stack_name):
             if match:
                 sso = match.group()
                 email = f"{sso}@company.com"
-                print(f"Detected User: {sso}, Email: {email}")
+                print(f"Found User: {sso}, Email: {email}")
                 return email
 
         print("No valid user found in CloudTrail events.")
