@@ -12,24 +12,29 @@ SES_SENDER_EMAIL = os.environ["SES_SENDER_EMAIL"]  # Must be verified in SES
 
 def lambda_handler(event, context):
     """Handles CloudFormation Drift Detection event, finds user, and sends email."""
-    print("Lambda triggered with event:", event)  # Debugging print
+    print("Lambda triggered with event:", json.dumps(event, indent=2))  # Debugging print
 
-    # ✅ Step 1: Extract Stack ID and Name
+    # ✅ Step 1: Validate the event (Only process drifted stacks)
+    if event["detail"].get("stack-drift-status") != "DRIFTED":
+        print("No drift detected. Exiting.")
+        return {"statusCode": 200, "body": "No drift detected"}
+
+    # ✅ Step 2: Extract Stack ID and Name
     stack_id = event["detail"].get("stack-id", "")
     if not stack_id:
         print("Error: No stack-id found in event!")
         return {"statusCode": 400, "body": "No stack-id found"}
 
-    stack_name = stack_id.split("/")[-2]  # Extracting stack name from ARN
+    stack_name = stack_id.split("/")[-2]  # Extract stack name from ARN
     print("Extracted Stack Name:", stack_name)  # Debugging print
 
-    # ✅ Step 2: Get User from CloudTrail
+    # ✅ Step 3: Get User from CloudTrail
     user_email = get_user_from_cloudtrail(stack_name)
     if not user_email:
         print(f"No user found for stack {stack_name}. Skipping email.")
         return {"statusCode": 200, "body": f"No user found for {stack_name}"}
 
-    # ✅ Step 3: Send Email Notification
+    # ✅ Step 4: Send Email Notification
     send_email(user_email, stack_name)
 
     return {"statusCode": 200, "body": f"Drift notification sent to {user_email}"}
