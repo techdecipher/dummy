@@ -1,0 +1,17 @@
+{
+  "source": ["aws.cloudtrail"],
+  "detail-type": ["AWS API Call via CloudTrail"],
+  "detail": {
+    "eventSource": [
+      "ec2.amazonaws.com",
+      "s3.amazonaws.com",
+      "iam.amazonaws.com",
+      "rds.amazonaws.com",
+      "lambda.amazonaws.com",
+      "dynamodb.amazonaws.com",
+      "cloudwatch.amazonaws.com"
+    ],
+    "eventCategory": ["Management"],
+    "readOnly": [false]
+  }
+}
