@@ -3,31 +3,40 @@ Test Event Name: test
 
 Response:
 {
-  "errorMessage": "An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection is already in progress for stack [arn:aws:cloudformation:us-east-1:158366596870:stack/Team-maintainer-members/34d888d0-e3b0-11ef-9675-0ece30c9efc5]",
-  "errorType": "ClientError",
-  "requestId": "547fcb9f-63d2-4a6d-8b33-e837c1113a71",
-  "stackTrace": [
-    "  File \"/var/task/lambda_function.py\", line 35, in lambda_handler\n    drift_status = detect_stack_drift(stack_name)\n",
-    "  File \"/var/task/lambda_function.py\", line 18, in detect_stack_drift\n    response = cloudformation.detect_stack_drift(StackName=stack_name)\n",
-    "  File \"/var/lang/lib/python3.11/site-packages/botocore/client.py\", line 565, in _api_call\n    return self._make_api_call(operation_name, kwargs)\n",
-    "  File \"/var/lang/lib/python3.11/site-packages/botocore/client.py\", line 1021, in _make_api_call\n    raise error_class(parsed_response, operation_name)\n"
-  ]
+  "errorMessage": "2025-02-06T18:31:06.821Z aacc32ab-5e32-4d6b-b567-52090868e1a5 Task timed out after 67.09 seconds"
 }
 
 Function Logs:
-START RequestId: 547fcb9f-63d2-4a6d-8b33-e837c1113a71 Version: $LATEST
-LAMBDA_WARNING: Unhandled exception. The most likely cause is an issue in the function code. However, in rare cases, a Lambda runtime update can cause unexpected function behavior. For functions using managed runtimes, runtime updates can be triggered by a function change, or can be applied automatically. To determine if the runtime has been updated, check the runtime version in the INIT_START log entry. If this error correlates with a change in the runtime version, you may be able to mitigate this error by temporarily rolling back to the previous runtime version. For more information, see https://docs.aws.amazon.com/lambda/latest/dg/runtimes-update.html
-[ERROR] ClientError: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection is already in progress for stack [arn:aws:cloudformation:us-east-1:158366596870:stack/Team-maintainer-members/34d888d0-e3b0-11ef-9675-0ece30c9efc5]
-Traceback (most recent call last):
-  File "/var/task/lambda_function.py", line 35, in lambda_handler
-    drift_status = detect_stack_drift(stack_name)
-  File "/var/task/lambda_function.py", line 18, in detect_stack_drift
-    response = cloudformation.detect_stack_drift(StackName=stack_name)
-  File "/var/lang/lib/python3.11/site-packages/botocore/client.py", line 565, in _api_call
-    return self._make_api_call(operation_name, kwargs)
-  File "/var/lang/lib/python3.11/site-packages/botocore/client.py", line 1021, in _make_api_call
-    raise error_class(parsed_response, operation_name)
-END RequestId: 547fcb9f-63d2-4a6d-8b33-e837c1113a71
-REPORT RequestId: 547fcb9f-63d2-4a6d-8b33-e837c1113a71	Duration: 11709.81 ms	Billed Duration: 11710 ms	Memory Size: 128 MB	Max Memory Used: 85 MB
+START RequestId: aacc32ab-5e32-4d6b-b567-52090868e1a5 Version: $LATEST
+CloudFormation Drift Status for Team-maintainer-members: IN_SYNC
+CloudFormation Drift Status for Codeowners-file-code-build-project: IN_SYNC
+CloudFormation Drift Status for test-RHL8-patching: IN_SYNC
+CloudFormation Drift Status for test-for-patching: IN_SYNC
+Error detecting drift for stack vds1: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/vds1/92456a30-bd2f-11ef-a6e3-122d7d2f3903] while it is in [ROLLBACK_COMPLETE] state
+CloudFormation Drift Status for vds1: UNKNOWN
+Error detecting drift for stack vds: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/vds/44786c30-bd2f-11ef-97ef-0affecf56d33] while it is in [ROLLBACK_COMPLETE] state
+CloudFormation Drift Status for vds: UNKNOWN
+Error detecting drift for stack vds-test: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/vds-test/44452400-bd2b-11ef-b86f-12d4a977d381] while it is in [ROLLBACK_COMPLETE] state
+CloudFormation Drift Status for vds-test: UNKNOWN
+CloudFormation Drift Status for StackSet-AWS-QuickSetup-SSMHostMgmt-LA-zbvwa-e3f748fa-050b-4e40-a505-bbc0dc00fbc7: IN_SYNC
+CloudFormation Drift Status for patch-group-test: IN_SYNC
+CloudFormation Drift Status for test-ldap-inv: IN_SYNC
+CloudFormation Drift Status for gev-gp-dbr-common-cft-pipeline: DRIFTED
+CloudFormation Drift Status for genaiops: IN_SYNC
+CloudFormation Drift Status for Gpu-Poc-amazn: IN_SYNC
+Error detecting drift for stack Gpu-Poc-amz: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/Gpu-Poc-amz/133d3d00-711f-11ef-a78f-12b9c09028bf] while it is in [ROLLBACK_COMPLETE] state
+CloudFormation Drift Status for Gpu-Poc-amz: UNKNOWN
+Error detecting drift for stack Gpu-Poc-amazon: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/Gpu-Poc-amazon/ea994c00-711d-11ef-975b-0e34c62dc21d] while it is in [ROLLBACK_COMPLETE] state
+CloudFormation Drift Status for Gpu-Poc-amazon: UNKNOWN
+CloudFormation Drift Status for Gpu-Poc: IN_SYNC
+CloudFormation Drift Status for gev-gp-af-platform-cft-pipeline: DRIFTED
+Error detecting drift for stack testrole2: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/testrole2/d1ce59b0-54b5-11ef-9682-0afffd189055] while it is in [ROLLBACK_COMPLETE] state
+CloudFormation Drift Status for testrole2: UNKNOWN
+Error detecting drift for stack aws-cloud9-dev-test-d745889a330d410ea70bd0f9708f2a0f: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/aws-cloud9-dev-test-d745889a330d410ea70bd0f9708f2a0f/31744e70-50a0-11ef-9168-12ef17186ac3] while it is in [ROLLBACK_COMPLETE] state
+CloudFormation Drift Status for aws-cloud9-dev-test-d745889a330d410ea70bd0f9708f2a0f: UNKNOWN
+2025-02-06T18:31:06.821Z aacc32ab-5e32-4d6b-b567-52090868e1a5 Task timed out after 67.09 seconds
 
-Request ID: 547fcb9f-63d2-4a6d-8b33-e837c1113a71
+END RequestId: aacc32ab-5e32-4d6b-b567-52090868e1a5
+REPORT RequestId: aacc32ab-5e32-4d6b-b567-52090868e1a5	Duration: 67092.06 ms	Billed Duration: 67000 ms	Memory Size: 128 MB	Max Memory Used: 83 MB	Init Duration: 425.91 ms
+
+Request ID: aacc32ab-5e32-4d6b-b567-52090868e1a5
