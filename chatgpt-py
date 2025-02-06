@@ -1,0 +1,40 @@
+import boto3
+import time
+
+cloudformation = boto3.client('cloudformation')
+
+def get_active_stacks():
+    """Fetch all active stacks (CREATE_COMPLETE, UPDATE_COMPLETE)"""
+    active_stacks = []
+    paginator = cloudformation.get_paginator('list_stacks')
+    
+    for page in paginator.paginate(StackStatusFilter=['CREATE_COMPLETE', 'UPDATE_COMPLETE']):
+        for stack in page['StackSummaries']:
+            active_stacks.append(stack['StackName'])
+    
+    return active_stacks
+
+def check_drift_status(stack_name):
+    """Detect drift for a given stack and wait until detection completes"""
+    response = cloudformation.detect_stack_drift(StackName=stack_name)
+    drift_detection_id = response['StackDriftDetectionId']
+
+    while True:
+        stack_info = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0]
+        drift_status = stack_info.get('DriftInformation', {}).get('StackDriftStatus', 'UNKNOWN')
+
+        if drift_status not in ["DETECTION_IN_PROGRESS", "UNKNOWN"]:
+            return drift_status
+
+        time.sleep(10)  # Wait before checking again
+
+def lambda_handler(event, context):
+    """Lambda function to check drift status for all stacks and print results"""
+    stacks = get_active_stacks()
+
+    for stack_name in stacks:
+        drift_status = check_drift_status(stack_name)
+
+        if drift_status == "DRIFTED":
+            print(f"CloudFormation Drift Status for {stack_name}: {drift_status}")
+
