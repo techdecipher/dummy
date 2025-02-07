@@ -4,12 +4,14 @@ Test Event Name: test
 Response:
 {
   "statusCode": 200,
-  "body": "Drift detection result for gev-gp-af-platform-cft-pipeline : None"
+  "body": "Drift detection result for gev-gp-af-platform-cft-pipeline: None"
 }
 
 Function Logs:
-START RequestId: 724c0062-c1d5-4241-bbb8-642b25a8021b Version: $LATEST
-END RequestId: 724c0062-c1d5-4241-bbb8-642b25a8021b
-REPORT RequestId: 724c0062-c1d5-4241-bbb8-642b25a8021b	Duration: 144.69 ms	Billed Duration: 145 ms	Memory Size: 256 MB	Max Memory Used: 80 MB	Init Duration: 389.73 ms
+START RequestId: 47f1560e-23f7-4b31-9120-f18d0d81a614 Version: $LATEST
+🔹 Lambda execution started for stack: gev-gp-af-platform-cft-pipeline
+⚠️ Unexpected result for gev-gp-af-platform-cft-pipeline: None
+END RequestId: 47f1560e-23f7-4b31-9120-f18d0d81a614
+REPORT RequestId: 47f1560e-23f7-4b31-9120-f18d0d81a614	Duration: 208.65 ms	Billed Duration: 209 ms	Memory Size: 256 MB	Max Memory Used: 80 MB	Init Duration: 414.35 ms
 
-Request ID: 724c0062-c1d5-4241-bbb8-642b25a8021b
+Request ID: 47f1560e-23f7-4b31-9120-f18d0d81a614
