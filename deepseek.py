@@ -3,40 +3,56 @@ import time
 
 cloudformation = boto3.client('cloudformation')
 
-def get_all_stacks():
-    """Retrieve all CloudFormation stacks that are not in DELETE_COMPLETE state."""
+def get_valid_stacks():
+    """Retrieve all active stacks (excluding DELETE_COMPLETE and ROLLBACK_COMPLETE)."""
     stacks = []
     paginator = cloudformation.get_paginator('list_stacks')
-    for page in paginator.paginate(StackStatusFilter=[
-        'CREATE_COMPLETE', 'UPDATE_COMPLETE', 'UPDATE_ROLLBACK_COMPLETE', 'ROLLBACK_COMPLETE'
-    ]):
+    for page in paginator.paginate(StackStatusFilter=['CREATE_COMPLETE', 'UPDATE_COMPLETE']):  
         stacks.extend(page['StackSummaries'])
+    
     return [stack['StackName'] for stack in stacks]
 
-def detect_stack_drift(stack_name):
-    """Detect drift for a specific stack and return the drift status."""
-    response = cloudformation.detect_stack_drift(StackName=stack_name)
-    drift_detection_id = response['StackDriftDetectionId']
-    
-    # Wait for drift detection to complete
+def monitor_drift_detection(drift_detection_id):
+    """Monitor drift detection progress until completion."""
     while True:
-        drift_status = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0]['DriftInformation']['StackDriftStatus']
-        if drift_status != "DETECTION_IN_PROGRESS":
-            break
-        time.sleep(10)  # Wait before checking again
-    
-    return drift_status
+        response = cloudformation.describe_stack_drift_detection_status(StackDriftDetectionId=drift_detection_id)
+        detection_status = response['DetectionStatus']
+
+        if detection_status == "DETECTION_COMPLETE":
+            return response['StackDriftStatus']
+        
+        elif detection_status == "DETECTION_FAILED":
+            print(f"⚠️ Drift detection failed: {response.get('DetectionStatusReason', 'Unknown reason')}")
+            return "UNKNOWN"
+
+        time.sleep(5)  # Reduce wait time for faster execution
+
+def detect_stack_drift(stack_name):
+    """Trigger drift detection with rate limiting to prevent throttling."""
+    try:
+        response = cloudformation.detect_stack_drift(StackName=stack_name)
+        drift_detection_id = response['StackDriftDetectionId']
+        print(f"🔄 Started drift detection for {stack_name}. Tracking progress...")
+
+        time.sleep(2)  # Add a delay to prevent throttling
+
+        return monitor_drift_detection(drift_detection_id)
+
+    except Exception as e:
+        print(f"⚠️ Error detecting drift for stack {stack_name}: {str(e)}")
+        return None  # Skip printing for invalid stacks
 
 def lambda_handler(event, context):
-    """Lambda function to detect drift for all CloudFormation stacks."""
-    stack_names = get_all_stacks()
-    
+    """Lambda function to trigger drift detection and only print IN_SYNC or DRIFTED stacks."""
+    stack_names = get_valid_stacks()
+
     for stack_name in stack_names:
         drift_status = detect_stack_drift(stack_name)
-        
-        # Print drift status to logs (CloudWatch)
-        print(f"CloudFormation Drift Status for {stack_name}: {drift_status}")
-    
+
+        # Print only if drift detection was successful
+        if drift_status in ["IN_SYNC", "DRIFTED"]:
+            print(f"✅ CloudFormation Drift Status for {stack_name}: {drift_status}")
+
     return {
         'statusCode': 200,
         'body': 'Drift detection completed for all stacks.'
