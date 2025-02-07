@@ -1,42 +1,22 @@
-Status: Failed
-Test Event Name: test
+2025-02-07T05:38:04.700Z
+Drift detection failed: {"Summary":"Failed to detect drift on resources [Ec2AppServer]","Failures":[{"Resource":"Ec2AppServer","FailureReason":"You are not authorized to perform this operation. User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: ec2:DescribeInstances because no identity-based policy allows the ec2:DescribeInstances action (Service: Ec2, Status Code: 403, Request ID: 0e4c11a0-71ce-4f64-ae2d-135b71ad2b5a)"}]}
+2025-02-07T05:38:04.767Z
+Started drift detection for test-for-patching. Tracking progress...
 
-Response:
+Started drift detection for test-for-patching. Tracking progress...
+2025-02-07T05:38:09.801Z
+Drift detection failed: 
 {
-  "errorMessage": "2025-02-06T18:31:06.821Z aacc32ab-5e32-4d6b-b567-52090868e1a5 Task timed out after 67.09 seconds"
+    "Summary": "Failed to detect drift on resources [Ec2AppServer]",
+    "Failures": [
+        {
+            "Resource": "Ec2AppServer",
+            "FailureReason": "You are not authorized to perform this operation. User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: ec2:DescribeInstances because no identity-based policy allows the ec2:DescribeInstances action (Service: Ec2, Status Code: 403, Request ID: a183f7b6-4fa9-4365-905b-0d6e3729289d)"
+        }
+    ]
 }
 
-Function Logs:
-START RequestId: aacc32ab-5e32-4d6b-b567-52090868e1a5 Version: $LATEST
-CloudFormation Drift Status for Team-maintainer-members: IN_SYNC
-CloudFormation Drift Status for Codeowners-file-code-build-project: IN_SYNC
-CloudFormation Drift Status for test-RHL8-patching: IN_SYNC
-CloudFormation Drift Status for test-for-patching: IN_SYNC
-Error detecting drift for stack vds1: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/vds1/92456a30-bd2f-11ef-a6e3-122d7d2f3903] while it is in [ROLLBACK_COMPLETE] state
-CloudFormation Drift Status for vds1: UNKNOWN
-Error detecting drift for stack vds: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/vds/44786c30-bd2f-11ef-97ef-0affecf56d33] while it is in [ROLLBACK_COMPLETE] state
-CloudFormation Drift Status for vds: UNKNOWN
-Error detecting drift for stack vds-test: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/vds-test/44452400-bd2b-11ef-b86f-12d4a977d381] while it is in [ROLLBACK_COMPLETE] state
-CloudFormation Drift Status for vds-test: UNKNOWN
-CloudFormation Drift Status for StackSet-AWS-QuickSetup-SSMHostMgmt-LA-zbvwa-e3f748fa-050b-4e40-a505-bbc0dc00fbc7: IN_SYNC
-CloudFormation Drift Status for patch-group-test: IN_SYNC
-CloudFormation Drift Status for test-ldap-inv: IN_SYNC
-CloudFormation Drift Status for gev-gp-dbr-common-cft-pipeline: DRIFTED
-CloudFormation Drift Status for genaiops: IN_SYNC
-CloudFormation Drift Status for Gpu-Poc-amazn: IN_SYNC
-Error detecting drift for stack Gpu-Poc-amz: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/Gpu-Poc-amz/133d3d00-711f-11ef-a78f-12b9c09028bf] while it is in [ROLLBACK_COMPLETE] state
-CloudFormation Drift Status for Gpu-Poc-amz: UNKNOWN
-Error detecting drift for stack Gpu-Poc-amazon: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/Gpu-Poc-amazon/ea994c00-711d-11ef-975b-0e34c62dc21d] while it is in [ROLLBACK_COMPLETE] state
-CloudFormation Drift Status for Gpu-Poc-amazon: UNKNOWN
-CloudFormation Drift Status for Gpu-Poc: IN_SYNC
-CloudFormation Drift Status for gev-gp-af-platform-cft-pipeline: DRIFTED
-Error detecting drift for stack testrole2: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/testrole2/d1ce59b0-54b5-11ef-9682-0afffd189055] while it is in [ROLLBACK_COMPLETE] state
-CloudFormation Drift Status for testrole2: UNKNOWN
-Error detecting drift for stack aws-cloud9-dev-test-d745889a330d410ea70bd0f9708f2a0f: An error occurred (ValidationError) when calling the DetectStackDrift operation: Drift detection cannot be performed on stack [arn:aws:cloudformation:us-east-1:158366596870:stack/aws-cloud9-dev-test-d745889a330d410ea70bd0f9708f2a0f/31744e70-50a0-11ef-9168-12ef17186ac3] while it is in [ROLLBACK_COMPLETE] state
-CloudFormation Drift Status for aws-cloud9-dev-test-d745889a330d410ea70bd0f9708f2a0f: UNKNOWN
-2025-02-06T18:31:06.821Z aacc32ab-5e32-4d6b-b567-52090868e1a5 Task timed out after 67.09 seconds
 
-END RequestId: aacc32ab-5e32-4d6b-b567-52090868e1a5
-REPORT RequestId: aacc32ab-5e32-4d6b-b567-52090868e1a5	Duration: 67092.06 ms	Billed Duration: 67000 ms	Memory Size: 128 MB	Max Memory Used: 83 MB	Init Duration: 425.91 ms
-
-Request ID: aacc32ab-5e32-4d6b-b567-52090868e1a5
+Drift detection failed: {"Summary":"Failed to detect drift on resources [Ec2AppServer]","Failures":[{"Resource":"Ec2AppServer","FailureReason":"You are not authorized to perform this operation. User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: ec2:DescribeInstances because no identity-based policy allows the ec2:DescribeInstances action (Service: Ec2, Status Code: 403, Request ID: a183f7b6-4fa9-4365-905b-0d6e3729289d)"}]}
+2025-02-07T05:38:09.861Z
+Started drift detection for StackSet-AWS-QuickSetup-SSMHostMgmt-LA-zbvwa-e3f748fa-050b-4e40-a505-bbc0dc00fbc7. Tracking progress..
