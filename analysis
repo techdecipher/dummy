@@ -1,61 +1,64 @@
-2025-02-07T06:48:46.401Z
-INIT_START Runtime Version: python:3.11.v46 Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:84bc5fe9641102b252ebbfd80d16f2791f7bcca59e26ce68d95066317adf4503
-2025-02-07T06:48:46.839Z
-START RequestId: d2559f59-ff1a-4091-a9a3-cf641291c6b1 Version: $LATEST
-2025-02-07T06:48:47.788Z
-Started drift detection for Execution-Role-exe. Tracking progress...
-2025-02-07T06:48:53.525Z
-Drift detection failed: 
-{
-    "Summary": "Failed to detect drift on resources [ExecutionRoleBuilderMacroTestRole]",
-    "Failures": [
-        {
-            "Resource": "ExecutionRoleBuilderMacroTestRole",
-            "FailureReason": "User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: iam:GetRole on resource: role ecs-ec2-dna-fed because no identity-based policy allows the iam:GetRole action (Service: Iam, Status Code: 403, Request ID: 4ea86beb-bf44-46b7-b4e2-13c2b7dffb7b)"
-        }
-    ]
-}
+import boto3
+import time
 
+cloudformation = boto3.client('cloudformation')
 
-Drift detection failed: {"Summary":"Failed to detect drift on resources [ExecutionRoleBuilderMacroTestRole]","Failures":[{"Resource":"ExecutionRoleBuilderMacroTestRole","FailureReason":"User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: iam:GetRole on resource: role ecs-ec2-dna-fed because no identity-based policy allows the iam:GetRole action (Service: Iam, Status Code: 403, Request ID: 4ea86beb-bf44-46b7-b4e2-13c2b7dffb7b)"}]}
-2025-02-07T06:48:56.164Z
-Throttling detected for Codeowners-file-code-build-project. Retrying in 2 seconds...
-2025-02-07T06:48:57.156Z
-Throttling detected for test-RHL8-patching. Retrying in 2 seconds...
-2025-02-07T06:48:58.040Z
-Throttling detected for Team-maintainer-members. Retrying in 2 seconds...
-2025-02-07T06:49:08.008Z
-Throttling detected for test-RHL8-patching. Retrying in 4 seconds...
-2025-02-07T06:49:11.294Z
-Throttling detected for Codeowners-file-code-build-project. Retrying in 4 seconds...
-2025-02-07T06:49:12.778Z
-Throttling detected for Team-maintainer-members. Retrying in 4 seconds...
-2025-02-07T06:49:15.114Z
-Throttling detected for test-RHL8-patching. Retrying in 8 seconds...
-2025-02-07T06:49:23.569Z
-Throttling detected for Codeowners-file-code-build-project. Retrying in 8 seconds...
-2025-02-07T06:49:24.520Z
-Throttling detected for Team-maintainer-members. Retrying in 8 seconds...
-2025-02-07T06:49:29.264Z
-Throttling detected for test-RHL8-patching. Retrying in 16 seconds...
-2025-02-07T06:49:39.033Z
-Throttling detected for Team-maintainer-members. Retrying in 16 seconds...
-2025-02-07T06:49:41.568Z
-Throttling detected for Codeowners-file-code-build-project. Retrying in 16 seconds...
-2025-02-07T06:49:53.912Z
-Throttling detected for test-RHL8-patching. Retrying in 32 seconds...
-2025-02-07T06:49:59.655Z
-Throttling detected for Codeowners-file-code-build-project. Retrying in 32 seconds...
-2025-02-07T06:50:06.366Z
-Throttling detected for Team-maintainer-members. Retrying in 32 seconds...
-2025-02-07T06:50:33.082Z
-Throttling detected for test-RHL8-patching. Retrying in 64 seconds...
-2025-02-07T06:50:39.745Z
-Throttling detected for Codeowners-file-code-build-project. Retrying in 64 seconds...
-2025-02-07T06:50:48.011Z
-Throttling detected for Team-maintainer-members. Retrying in 64 seconds...
-No newer events at this moment. 
-Auto retry paused.
- 
-Resume
- 
+def get_valid_stacks():
+    """Retrieve all CloudFormation stacks that are not in DELETE_COMPLETE or ROLLBACK_COMPLETE state."""
+    stacks = []
+    paginator = cloudformation.get_paginator('list_stacks')
+    for page in paginator.paginate(StackStatusFilter=[
+        'CREATE_COMPLETE', 'UPDATE_COMPLETE'
+    ]):  # Removed ROLLBACK_COMPLETE stacks
+        stacks.extend(page['StackSummaries'])
+    
+    return [stack['StackName'] for stack in stacks]
+
+def detect_stack_drift(stack_name):
+    """Check drift status and start detection only if necessary."""
+    stack_info = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0]
+    drift_info = stack_info.get('DriftInformation', {})
+    drift_status = drift_info.get('StackDriftStatus', 'UNKNOWN')
+
+    if drift_status == "DETECTION_IN_PROGRESS":
+        print(f"Drift detection already in progress for {stack_name}. Waiting...")
+        while True:
+            time.sleep(5)  # Reduced sleep time
+            stack_info = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0]
+            drift_status = stack_info.get('DriftInformation', {}).get('StackDriftStatus', 'UNKNOWN')
+            if drift_status != "DETECTION_IN_PROGRESS":
+                return drift_status
+
+    if drift_status not in ["DRIFTED", "IN_SYNC"]:
+        try:
+            response = cloudformation.detect_stack_drift(StackName=stack_name)
+            drift_detection_id = response['StackDriftDetectionId']
+
+            # Wait for completion
+            while True:
+                time.sleep(5)  # Reduced sleep time
+                stack_info = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0]
+                drift_status = stack_info.get('DriftInformation', {}).get('StackDriftStatus', 'UNKNOWN')
+                if drift_status != "DETECTION_IN_PROGRESS":
+                    return drift_status
+        except Exception as e:
+            print(f"Error detecting drift for stack {stack_name}: {str(e)}")
+            return None  # Don't print this in the final output
+
+    return drift_status
+
+def lambda_handler(event, context):
+    """Lambda function to detect drift for all CloudFormation stacks."""
+    stack_names = get_valid_stacks()
+
+    for stack_name in stack_names:
+        drift_status = detect_stack_drift(stack_name)
+
+        # Print only if stack is IN_SYNC or DRIFTED
+        if drift_status in ["IN_SYNC", "DRIFTED"]:
+            print(f"CloudFormation Drift Status for {stack_name}: {drift_status}")
+
+    return {
+        'statusCode': 200,
+        'body': 'Drift detection completed for valid stacks.'
+    }
