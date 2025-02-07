@@ -1,15 +1,9 @@
-Status: Succeeded
-Test Event Name: test
+2025-02-07T07:06:03.541Z
+INIT_START Runtime Version: python:3.11.v46	Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:84bc5fe9641102b252ebbfd80d16f2791f7bcca59e26ce68d95066317adf4503
 
-Response:
-{
-  "statusCode": 200,
-  "body": "Drift detection completed for gev-gp-af-platform-cft-pipeline."
-}
-
-Function Logs:
-START RequestId: fd2bec59-ed8a-4e83-a687-9017aeb9258a Version: $LATEST
-END RequestId: fd2bec59-ed8a-4e83-a687-9017aeb9258a
-REPORT RequestId: fd2bec59-ed8a-4e83-a687-9017aeb9258a	Duration: 150.66 ms	Billed Duration: 151 ms	Memory Size: 256 MB	Max Memory Used: 80 MB	Init Duration: 411.66 ms
-
-Request ID: fd2bec59-ed8a-4e83-a687-9017aeb9258a
+INIT_START Runtime Version: python:3.11.v46 Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:84bc5fe9641102b252ebbfd80d16f2791f7bcca59e26ce68d95066317adf4503
+No newer events at this moment. 
+Auto retry paused.
+ 
+Resume
+ 
