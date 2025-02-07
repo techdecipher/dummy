@@ -4,7 +4,7 @@ import time
 cloudformation = boto3.client('cloudformation')
 
 def get_valid_stacks():
-    """Retrieve all CloudFormation stacks that are not in DELETE_COMPLETE or ROLLBACK_COMPLETE state."""
+    """Retrieve all active stacks (excluding DELETE_COMPLETE and ROLLBACK_COMPLETE)."""
     stacks = []
     paginator = cloudformation.get_paginator('list_stacks')
     for page in paginator.paginate(StackStatusFilter=['CREATE_COMPLETE', 'UPDATE_COMPLETE']):  
@@ -13,60 +13,35 @@ def get_valid_stacks():
     return [stack['StackName'] for stack in stacks]
 
 def monitor_drift_detection(drift_detection_id):
-    """Track drift detection progress using describe-stack-drift-detection-status."""
+    """Monitor drift detection progress until completion."""
     while True:
         response = cloudformation.describe_stack_drift_detection_status(StackDriftDetectionId=drift_detection_id)
         detection_status = response['DetectionStatus']
-        
+
         if detection_status == "DETECTION_COMPLETE":
             return response['StackDriftStatus']
         
         elif detection_status == "DETECTION_FAILED":
-            print(f"Drift detection failed: {response.get('DetectionStatusReason', 'Unknown reason')}")
+            print(f"⚠️ Drift detection failed: {response.get('DetectionStatusReason', 'Unknown reason')}")
             return "UNKNOWN"
-        
+
         time.sleep(5)  # Reduce wait time for faster execution
 
-def get_drifted_resources(stack_name):
-    """Fetch details of drifted resources if the stack is in DRIFTED state."""
-    try:
-        response = cloudformation.describe_stack_resource_drifts(
-            StackName=stack_name,
-            StackResourceDriftStatusFilters=['MODIFIED', 'DELETED']
-        )
-        
-        drifted_resources = response.get('StackResourceDrifts', [])
-        
-        if drifted_resources:
-            print(f"⚠️  {stack_name} is DRIFTED. Changed Resources:")
-            for resource in drifted_resources:
-                print(f"  - {resource['LogicalResourceId']} ({resource['ResourceType']}) → {resource['StackResourceDriftStatus']}")
-        else:
-            print(f"⚠️  {stack_name} is DRIFTED, but no specific resource details found.")
-
-    except Exception as e:
-        print(f"Error fetching drift details for {stack_name}: {str(e)}")
-
 def detect_stack_drift(stack_name):
-    """Trigger drift detection and wait for the actual updated status."""
+    """Trigger drift detection and return updated status (only DRIFTED or IN_SYNC)."""
     try:
         response = cloudformation.detect_stack_drift(StackName=stack_name)
         drift_detection_id = response['StackDriftDetectionId']
         print(f"🔄 Started drift detection for {stack_name}. Tracking progress...")
-        
-        drift_status = monitor_drift_detection(drift_detection_id)
 
-        if drift_status == "DRIFTED":
-            get_drifted_resources(stack_name)
-
-        return drift_status
+        return monitor_drift_detection(drift_detection_id)
 
     except Exception as e:
-        print(f"Error detecting drift for stack {stack_name}: {str(e)}")
+        print(f"⚠️ Error detecting drift for stack {stack_name}: {str(e)}")
         return None  # Skip printing for invalid stacks
 
 def lambda_handler(event, context):
-    """Lambda function to trigger drift detection and get actual updated status."""
+    """Lambda function to trigger drift detection and only print IN_SYNC or DRIFTED stacks."""
     stack_names = get_valid_stacks()
 
     for stack_name in stack_names:
@@ -78,5 +53,5 @@ def lambda_handler(event, context):
 
     return {
         'statusCode': 200,
-        'body': 'Drift detection completed and updated for all stacks.'
+        'body': 'Drift detection completed for all stacks.'
     }
