@@ -1,22 +1,24 @@
-2025-02-07T05:38:04.700Z
-Drift detection failed: {"Summary":"Failed to detect drift on resources [Ec2AppServer]","Failures":[{"Resource":"Ec2AppServer","FailureReason":"You are not authorized to perform this operation. User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: ec2:DescribeInstances because no identity-based policy allows the ec2:DescribeInstances action (Service: Ec2, Status Code: 403, Request ID: 0e4c11a0-71ce-4f64-ae2d-135b71ad2b5a)"}]}
-2025-02-07T05:38:04.767Z
-Started drift detection for test-for-patching. Tracking progress...
+Status: Failed
+Test Event Name: test
 
-Started drift detection for test-for-patching. Tracking progress...
-2025-02-07T05:38:09.801Z
-Drift detection failed: 
+Response:
 {
-    "Summary": "Failed to detect drift on resources [Ec2AppServer]",
-    "Failures": [
-        {
-            "Resource": "Ec2AppServer",
-            "FailureReason": "You are not authorized to perform this operation. User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: ec2:DescribeInstances because no identity-based policy allows the ec2:DescribeInstances action (Service: Ec2, Status Code: 403, Request ID: a183f7b6-4fa9-4365-905b-0d6e3729289d)"
-        }
-    ]
+  "errorMessage": "2025-02-07T05:48:51.063Z 67fa3c0b-27a8-4166-88ff-b1ce252dbc04 Task timed out after 67.07 seconds"
 }
 
+Function Logs:
+START RequestId: 67fa3c0b-27a8-4166-88ff-b1ce252dbc04 Version: $LATEST
+Error detecting drift for stack Team-maintainer-members: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
+Error detecting drift for stack Codeowners-file-code-build-project: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
+Error detecting drift for stack test-RHL8-patching: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
+Error detecting drift for stack test-for-patching: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
+Error detecting drift for stack StackSet-AWS-QuickSetup-SSMHostMgmt-LA-zbvwa-e3f748fa-050b-4e40-a505-bbc0dc00fbc7: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
+Error detecting drift for stack patch-group-test: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
+Error detecting drift for stack test-ldap-inv: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
+Error detecting drift for stack gev-gp-dbr-common-cft-pipeline: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
+2025-02-07T05:48:51.063Z 67fa3c0b-27a8-4166-88ff-b1ce252dbc04 Task timed out after 67.07 seconds
 
-Drift detection failed: {"Summary":"Failed to detect drift on resources [Ec2AppServer]","Failures":[{"Resource":"Ec2AppServer","FailureReason":"You are not authorized to perform this operation. User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: ec2:DescribeInstances because no identity-based policy allows the ec2:DescribeInstances action (Service: Ec2, Status Code: 403, Request ID: a183f7b6-4fa9-4365-905b-0d6e3729289d)"}]}
-2025-02-07T05:38:09.861Z
-Started drift detection for StackSet-AWS-QuickSetup-SSMHostMgmt-LA-zbvwa-e3f748fa-050b-4e40-a505-bbc0dc00fbc7. Tracking progress..
+END RequestId: 67fa3c0b-27a8-4166-88ff-b1ce252dbc04
+REPORT RequestId: 67fa3c0b-27a8-4166-88ff-b1ce252dbc04	Duration: 67072.10 ms	Billed Duration: 67000 ms	Memory Size: 128 MB	Max Memory Used: 83 MB	Init Duration: 377.43 ms
+
+Request ID: 67fa3c0b-27a8-4166-88ff-b1ce252dbc04
