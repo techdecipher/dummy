@@ -1,6 +1,8 @@
 import boto3
 import time
+import concurrent.futures
 
+# Initialize the CloudFormation client
 cloudformation = boto3.client('cloudformation')
 
 def get_valid_stacks():
@@ -25,31 +27,38 @@ def monitor_drift_detection(drift_detection_id):
             print(f"⚠️ Drift detection failed: {response.get('DetectionStatusReason', 'Unknown reason')}")
             return "UNKNOWN"
 
-        time.sleep(5)  # Reduce wait time for faster execution
+        time.sleep(2)  # Reduced wait time for faster execution
 
-def detect_stack_drift(stack_name):
-    """Trigger drift detection with rate limiting to prevent throttling."""
+def detect_stack_drift(stack_name, attempt=1):
+    """Trigger drift detection with exponential backoff to prevent throttling."""
     try:
         response = cloudformation.detect_stack_drift(StackName=stack_name)
         drift_detection_id = response['StackDriftDetectionId']
         print(f"🔄 Started drift detection for {stack_name}. Tracking progress...")
 
-        time.sleep(2)  # Add a delay to prevent throttling
-
         return monitor_drift_detection(drift_detection_id)
 
     except Exception as e:
-        print(f"⚠️ Error detecting drift for stack {stack_name}: {str(e)}")
-        return None  # Skip printing for invalid stacks
+        error_message = str(e)
+        if "Rate exceeded" in error_message and attempt <= 10:  # Increased max retries
+            wait_time = 2 ** attempt  # Exponential backoff (2, 4, 8, 16, 32, 64, 128, 256, 512, 1024 seconds)
+            print(f"⚠️ Throttling detected for {stack_name}. Retrying in {wait_time} seconds...")
+            time.sleep(wait_time)
+            return detect_stack_drift(stack_name, attempt + 1)
+
+        print(f"⚠️ Error detecting drift for {stack_name}: {error_message}")
+        return None
 
 def lambda_handler(event, context):
     """Lambda function to trigger drift detection and only print IN_SYNC or DRIFTED stacks."""
     stack_names = get_valid_stacks()
 
-    for stack_name in stack_names:
-        drift_status = detect_stack_drift(stack_name)
+    # Use ThreadPoolExecutor with reduced concurrency (max_workers=3)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        results = list(executor.map(detect_stack_drift, stack_names))
 
-        # Print only if drift detection was successful
+    # Print results for stacks that are IN_SYNC or DRIFTED
+    for stack_name, drift_status in zip(stack_names, results):
         if drift_status in ["IN_SYNC", "DRIFTED"]:
             print(f"✅ CloudFormation Drift Status for {stack_name}: {drift_status}")
 
