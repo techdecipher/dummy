@@ -1,19 +1,6 @@
-
-- pwd
-- cd $CODEBUILD_SRC_DIR_source_artifactsDbr
-- ls -ltr
-- jobNames=$(grep -n "task_id="run_fdl_dbjob_" "fdl_dbjob_ds_invoice_commodity_workflow_is_GEV
-while IFS read - line; do
-lineNumber=$(echo "$line" | cut -d: -f1)
-jobName=$(echo "$line" | cut -d: -f2- | sed "s/task_id='run_fdl_dbjob_//" | sed "s/"//" echo "Line number: $lineNumber, Job name: $jobName"
-done <<< "$jobNames" >> output.txt
-- ls -ltrh
-- cat output.txt
-- awk '{print int($3) + 1}' output.txt >> id.txt
-- awk '{print $6}' output.txt >> job_name.txt
-- cat id.txt job_name.txt
-Process each line in job_name.txt
-while IFS read -r task_name; do
-echo "Processing task_name: $task_name"
-Fetch the job_id for the task_name using the Databricks API
-curl --request GET "https://gevernova-gas-power-dev-dbr.cloud.databricks.com/api/2.1/jobs/
+{
+  "detail-type": ["AWS API Call via CloudTrail"],
+  "detail": {
+    "eventName": ["Create*", "Update*", "Delete*"]
+  }
+}
