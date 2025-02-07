@@ -1,22 +1,64 @@
-Status: Failed
-Test Event Name: test
+import boto3
+import time
 
-Response:
-{
-  "errorMessage": "2025-02-07T06:02:22.373Z fc9dc67c-5bfe-456f-aae4-bc53d36fe0fa Task timed out after 67.08 seconds"
-}
+cloudformation = boto3.client('cloudformation')
 
-Function Logs:
-START RequestId: fc9dc67c-5bfe-456f-aae4-bc53d36fe0fa Version: $LATEST
-Error detecting drift for stack Team-maintainer-members: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
-Error detecting drift for stack Codeowners-file-code-build-project: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
-Error detecting drift for stack test-RHL8-patching: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
-Error detecting drift for stack test-for-patching: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
-Error detecting drift for stack StackSet-AWS-QuickSetup-SSMHostMgmt-LA-zbvwa-e3f748fa-050b-4e40-a505-bbc0dc00fbc7: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
-Error detecting drift for stack patch-group-test: An error occurred (Throttling) when calling the DetectStackDrift operation (reached max retries: 4): Rate exceeded
-2025-02-07T06:02:22.373Z fc9dc67c-5bfe-456f-aae4-bc53d36fe0fa Task timed out after 67.08 seconds
+def get_valid_stacks():
+    """Retrieve all CloudFormation stacks that are not in DELETE_COMPLETE or ROLLBACK_COMPLETE state."""
+    stacks = []
+    paginator = cloudformation.get_paginator('list_stacks')
+    for page in paginator.paginate(StackStatusFilter=[
+        'CREATE_COMPLETE', 'UPDATE_COMPLETE'
+    ]):  # Removed ROLLBACK_COMPLETE stacks
+        stacks.extend(page['StackSummaries'])
+    
+    return [stack['StackName'] for stack in stacks]
 
-END RequestId: fc9dc67c-5bfe-456f-aae4-bc53d36fe0fa
-REPORT RequestId: fc9dc67c-5bfe-456f-aae4-bc53d36fe0fa	Duration: 67075.76 ms	Billed Duration: 67000 ms	Memory Size: 128 MB	Max Memory Used: 32 MB
+def detect_stack_drift(stack_name):
+    """Check drift status and start detection only if necessary."""
+    stack_info = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0]
+    drift_info = stack_info.get('DriftInformation', {})
+    drift_status = drift_info.get('StackDriftStatus', 'UNKNOWN')
 
-Request ID: fc9dc67c-5bfe-456f-aae4-bc53d36fe0fa
+    if drift_status == "DETECTION_IN_PROGRESS":
+        print(f"Drift detection already in progress for {stack_name}. Waiting...")
+        while True:
+            time.sleep(5)  # Reduced sleep time
+            stack_info = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0]
+            drift_status = stack_info.get('DriftInformation', {}).get('StackDriftStatus', 'UNKNOWN')
+            if drift_status != "DETECTION_IN_PROGRESS":
+                return drift_status
+
+    if drift_status not in ["DRIFTED", "IN_SYNC"]:
+        try:
+            response = cloudformation.detect_stack_drift(StackName=stack_name)
+            drift_detection_id = response['StackDriftDetectionId']
+
+            # Wait for completion
+            while True:
+                time.sleep(5)  # Reduced sleep time
+                stack_info = cloudformation.describe_stacks(StackName=stack_name)['Stacks'][0]
+                drift_status = stack_info.get('DriftInformation', {}).get('StackDriftStatus', 'UNKNOWN')
+                if drift_status != "DETECTION_IN_PROGRESS":
+                    return drift_status
+        except Exception as e:
+            print(f"Error detecting drift for stack {stack_name}: {str(e)}")
+            return None  # Don't print this in the final output
+
+    return drift_status
+
+def lambda_handler(event, context):
+    """Lambda function to detect drift for all CloudFormation stacks."""
+    stack_names = get_valid_stacks()
+
+    for stack_name in stack_names:
+        drift_status = detect_stack_drift(stack_name)
+
+        # Print only if stack is IN_SYNC or DRIFTED
+        if drift_status in ["IN_SYNC", "DRIFTED"]:
+            print(f"CloudFormation Drift Status for {stack_name}: {drift_status}")
+
+    return {
+        'statusCode': 200,
+        'body': 'Drift detection completed for valid stacks.'
+    }
