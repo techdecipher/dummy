@@ -1,59 +1,44 @@
 import boto3
-import time
-
-# 🔹 Enter the stack name here
-STACK_NAME = "testses"
-
-cloudformation = boto3.client('cloudformation')
-
-def detect_stack_drift(stack_name, attempt=1):
-    """Force drift detection every time Lambda runs."""
-    try:
-        # Step 1: Always trigger drift detection
-        response = cloudformation.detect_stack_drift(StackName=stack_name)
-        drift_detection_id = response.get('StackDriftDetectionId')
-        if not drift_detection_id:
-            print(f"⚠️ No DriftDetectionId returned for {stack_name}.")
-            return "ERROR: No detection ID"
-
-        print(f"🔄 Started drift detection for {stack_name}. Tracking progress...")
-
-        # Step 2: Wait for drift detection to complete
-        while True:
-            time.sleep(5)
-            status_response = cloudformation.describe_stack_drift_detection_status(StackDriftDetectionId=drift_detection_id)
-            detection_status = status_response['DetectionStatus']
-
-            if detection_status == "DETECTION_COMPLETE":
-                return status_response['StackDriftStatus']
-            elif detection_status == "DETECTION_FAILED":
-                return f"⚠️ Drift detection failed: {status_response.get('DetectionStatusReason', 'Unknown reason')}"
-
-    except Exception as e:
-        error_message = str(e)
-
-        # Step 3: Handle Rate Limit Issues (Retry with Exponential Backoff)
-        if "Rate exceeded" in error_message and attempt <= 5:
-            wait_time = 2 ** attempt  # Exponential backoff (2, 4, 8, 16, 32 seconds)
-            print(f"⚠️ Rate limit hit. Retrying {stack_name} in {wait_time} seconds...")
-            time.sleep(wait_time)
-            return detect_stack_drift(stack_name, attempt + 1)
-
-        print(f"⚠️ Error detecting drift for {stack_name}: {error_message}")
-        return f"Error: {error_message}"
 
 def lambda_handler(event, context):
-    """Lambda function to force detect drift for a specific CloudFormation stack."""
-    print(f"🔹 Lambda execution started for stack: {STACK_NAME}")
-
-    drift_status = detect_stack_drift(STACK_NAME)
-
-    if drift_status in ["IN_SYNC", "DRIFTED"]:
-        print(f"✅ CloudFormation Drift Status for {STACK_NAME}: {drift_status}")
-    else:
-        print(f"⚠️ Unexpected result for {STACK_NAME}: {drift_status}")
-
-    return {
-        'statusCode': 200,
-        'body': f'Drift detection result for {STACK_NAME}: {drift_status}'
-    }
+    # Hardcode the SQS queue name here
+    sqs_queue_name = "your-sqs-queue-name"  # Replace with your SQS queue name
+    
+    # Initialize boto3 clients
+    sqs_client = boto3.client('sqs')
+    cloudformation_client = boto3.client('cloudformation')
+    
+    try:
+        # Get the SQS queue URL
+        queue_url = sqs_client.get_queue_url(QueueName=sqs_queue_name)['QueueUrl']
+        
+        # Extract the queue ARN
+        queue_arn = sqs_client.get_queue_attributes(
+            QueueUrl=queue_url,
+            AttributeNames=['QueueArn']
+        )['Attributes']['QueueArn']
+        
+        # List all CloudFormation stacks
+        stacks = cloudformation_client.list_stacks(StackStatusFilter=['CREATE_COMPLETE', 'UPDATE_COMPLETE'])
+        
+        # Check if the queue ARN belongs to any stack
+        for stack in stacks['StackSummaries']:
+            stack_resources = cloudformation_client.list_stack_resources(StackName=stack['StackName'])
+            for resource in stack_resources['StackResourceSummaries']:
+                if resource.get('PhysicalResourceId') == queue_arn:
+                    return {
+                        'statusCode': 200,
+                        'body': f'SQS queue {sqs_queue_name} belongs to stack {stack["StackName"]}'
+                    }
+        
+        # If no stack is found
+        return {
+            'statusCode': 404,
+            'body': f'SQS queue {sqs_queue_name} does not belong to any stack'
+        }
+    
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': f'Error: {str(e)}'
+        }
