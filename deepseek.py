@@ -1,44 +1,31 @@
 import boto3
 
-def lambda_handler(event, context):
-    # Hardcode the SQS queue name here
-    sqs_queue_name = "your-sqs-queue-name"  # Replace with your SQS queue name
-    
-    # Initialize boto3 clients
-    sqs_client = boto3.client('sqs')
-    cloudformation_client = boto3.client('cloudformation')
-    
+# Initialize AWS clients
+cloudformation = boto3.client('cloudformation')
+
+def list_all_stacks():
+    """Retrieve all CloudFormation stacks including paginated results."""
+    stacks = []
+    paginator = cloudformation.get_paginator("list_stacks")
+    for page in paginator.paginate(StackStatusFilter=["CREATE_COMPLETE", "UPDATE_COMPLETE", "ROLLBACK_COMPLETE"]):
+        stacks.extend(page.get("StackSummaries", []))
+    return stacks
+
+def find_stack(resource_name, resource_type):
+    """Find the CloudFormation stack managing the given resource, with pagination."""
     try:
-        # Get the SQS queue URL
-        queue_url = sqs_client.get_queue_url(QueueName=sqs_queue_name)['QueueUrl']
-        
-        # Extract the queue ARN
-        queue_arn = sqs_client.get_queue_attributes(
-            QueueUrl=queue_url,
-            AttributeNames=['QueueArn']
-        )['Attributes']['QueueArn']
-        
-        # List all CloudFormation stacks
-        stacks = cloudformation_client.list_stacks(StackStatusFilter=['CREATE_COMPLETE', 'UPDATE_COMPLETE'])
-        
-        # Check if the queue ARN belongs to any stack
-        for stack in stacks['StackSummaries']:
-            stack_resources = cloudformation_client.list_stack_resources(StackName=stack['StackName'])
-            for resource in stack_resources['StackResourceSummaries']:
-                if resource.get('PhysicalResourceId') == queue_arn:
-                    return {
-                        'statusCode': 200,
-                        'body': f'SQS queue {sqs_queue_name} belongs to stack {stack["StackName"]}'
-                    }
-        
-        # If no stack is found
-        return {
-            'statusCode': 404,
-            'body': f'SQS queue {sqs_queue_name} does not belong to any stack'
-        }
-    
+        stacks = list_all_stacks()
+        for stack in stacks:
+            stack_name = stack["StackName"]
+            paginator = cloudformation.get_paginator("list_stack_resources")
+            for page in paginator.paginate(StackName=stack_name):
+                for resource in page.get("StackResourceSummaries", []):
+                    if resource["ResourceType"] == resource_type and resource.get("PhysicalResourceId"):
+                        if resource_name in resource["PhysicalResourceId"]:  # Allow partial match
+                            print(f"✅ {resource_type} {resource_name} belongs to stack {stack_name}")
+                            return stack_name
+
+        print(f"🚫 No valid stack found for {resource_type} {resource_name}. Skipping drift check.")
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': f'Error: {str(e)}'
-        }
+        print(f"❌ Error finding stack for {resource_type}: {e}")
+    return None
