@@ -1,166 +1,130 @@
-2025-02-14T11:44:07.968Z
-INIT_START Runtime Version: python:3.11.v46 Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:84bc5fe9641102b252ebbfd80d16f2791f7bcca59e26ce68d95066317adf4503
-2025-02-14T11:44:08.444Z
-START RequestId: 05f00d4f-b550-4fe7-9fa0-6e79db2613bb Version: $LATEST
-2025-02-14T11:44:08.444Z
-🔹 Received event: {
-2025-02-14T11:44:08.444Z
-"version": "0",
-2025-02-14T11:44:08.444Z
-"id": "79dd10e5-77e5-bc3a-042f-04c5500015f7",
-2025-02-14T11:44:08.444Z
-"detail-type": "AWS API Call via CloudTrail",
-2025-02-14T11:44:08.444Z
-"source": "aws.sqs",
-2025-02-14T11:44:08.444Z
-"account": "158366596870",
-2025-02-14T11:44:08.444Z
-"time": "2025-02-14T11:43:47Z",
-2025-02-14T11:44:08.444Z
-"region": "us-east-1",
-2025-02-14T11:44:08.444Z
-"resources": [],
-2025-02-14T11:44:08.444Z
-"detail": {
-2025-02-14T11:44:08.444Z
-"eventVersion": "1.10",
-2025-02-14T11:44:08.444Z
-"userIdentity": {
-2025-02-14T11:44:08.444Z
-"type": "AssumedRole",
-2025-02-14T11:44:08.444Z
-"principalId": "AROASJX3CP4DAYSSJTE4:503430218",
-2025-02-14T11:44:08.444Z
-"arn": "arn:aws:sts::158366596870:assumed-role/bu-ge-dna-cldmgmt-fed/503430218",
-2025-02-14T11:44:08.444Z
-"accountId": "158366596870",
-2025-02-14T11:44:08.444Z
-"accessKeyId": "ASIASJX3CP4DETDQSDC4",
-2025-02-14T11:44:08.444Z
-"sessionContext": {
-2025-02-14T11:44:08.444Z
-"sessionIssuer": {
-2025-02-14T11:44:08.444Z
-"type": "Role",
-2025-02-14T11:44:08.444Z
-"principalId": "AROASJX3CP4DAYSSJTE4",
-2025-02-14T11:44:08.444Z
-"arn": "arn:aws:iam::158366596870:role/bu-ge-dna-cldmgmt-fed",
-2025-02-14T11:44:08.444Z
-"accountId": "158366596870",
-2025-02-14T11:44:08.444Z
-"userName": "bu-ge-dna-cldmgmt-fed"
-2025-02-14T11:44:08.444Z
-},
-2025-02-14T11:44:08.444Z
-"attributes": {
-2025-02-14T11:44:08.444Z
-"creationDate": "2025-02-14T11:19:30Z",
-2025-02-14T11:44:08.444Z
-"mfaAuthenticated": "false"
-2025-02-14T11:44:08.444Z
-}
-2025-02-14T11:44:08.444Z
-}
-2025-02-14T11:44:08.444Z
-},
-2025-02-14T11:44:08.444Z
-"eventTime": "2025-02-14T11:43:47Z",
-2025-02-14T11:44:08.444Z
-"eventSource": "sqs.amazonaws.com",
-2025-02-14T11:44:08.444Z
-"eventName": "SetQueueAttributes",
-2025-02-14T11:44:08.444Z
-"awsRegion": "us-east-1",
-2025-02-14T11:44:08.444Z
-"sourceIPAddress": "165.156.28.92",
-2025-02-14T11:44:08.444Z
-"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
-2025-02-14T11:44:08.444Z
-"requestParameters": {
-2025-02-14T11:44:08.444Z
-"queueUrl": "https://sqs.us-east-1.amazonaws.com/158366596870/drift-test-queue-12-158366596870-us-east-1",
-2025-02-14T11:44:08.444Z
-"attributes": {
-2025-02-14T11:44:08.444Z
-"Policy": "",
-2025-02-14T11:44:08.444Z
-"ReceiveMessageWaitTimeSeconds": "0",
-2025-02-14T11:44:08.444Z
-"SqsManagedSseEnabled": "true",
-2025-02-14T11:44:08.444Z
-"DelaySeconds": "0",
-2025-02-14T11:44:08.444Z
-"KmsMasterKeyId": "",
-2025-02-14T11:44:08.444Z
-"RedrivePolicy": "",
-2025-02-14T11:44:08.444Z
-"MessageRetentionPeriod": "345600",
-2025-02-14T11:44:08.444Z
-"MaximumMessageSize": "262144",
-2025-02-14T11:44:08.444Z
-"VisibilityTimeout": "32",
-2025-02-14T11:44:08.444Z
-"RedriveAllowPolicy": ""
-2025-02-14T11:44:08.444Z
-}
-2025-02-14T11:44:08.444Z
-},
-2025-02-14T11:44:08.444Z
-"responseElements": null,
-2025-02-14T11:44:08.444Z
-"requestID": "692361d5-1a05-5ca9-bbd8-01fc34b6aef4",
-2025-02-14T11:44:08.444Z
-"eventID": "97d05f9f-bf45-49af-a9db-eb1c7ff0c4b5",
-2025-02-14T11:44:08.444Z
-"readOnly": false,
-2025-02-14T11:44:08.444Z
-"resources": [
-2025-02-14T11:44:08.444Z
-{
-2025-02-14T11:44:08.444Z
-"accountId": "158366596870",
-2025-02-14T11:44:08.444Z
-"type": "AWS::SQS::Queue",
-2025-02-14T11:44:08.444Z
-"ARN": "arn:aws:sqs:us-east-1:158366596870:drift-test-queue-12-158366596870-us-east-1"
-2025-02-14T11:44:08.444Z
-}
-2025-02-14T11:44:08.444Z
-],
-2025-02-14T11:44:08.444Z
-"eventType": "AwsApiCall",
-2025-02-14T11:44:08.444Z
-"managementEvent": true,
-2025-02-14T11:44:08.444Z
-"recipientAccountId": "158366596870",
-2025-02-14T11:44:08.444Z
-"eventCategory": "Management",
-2025-02-14T11:44:08.444Z
-"tlsDetails": {
-2025-02-14T11:44:08.444Z
-"tlsVersion": "TLSv1.3",
-2025-02-14T11:44:08.444Z
-"cipherSuite": "TLS_AES_128_GCM_SHA256",
-2025-02-14T11:44:08.444Z
-"clientProvidedHostHeader": "sqs.us-east-1.amazonaws.com"
-2025-02-14T11:44:08.444Z
-},
-2025-02-14T11:44:08.444Z
-"sessionCredentialFromConsole": "true"
-2025-02-14T11:44:08.444Z
-}
-2025-02-14T11:44:08.444Z
-}
-2025-02-14T11:44:08.444Z
-🔄 SQS Queue Modified: drift-test-queue-12-158366596870-us-east-1, By User: unknown@ge.com
-2025-02-14T11:44:08.857Z
-✅ SQS Queue drift-test-queue-12-158366596870-us-east-1 belongs to stack SQS-stack-checking-for-drift
-2025-02-14T11:44:19.044Z
-✅ Drift Check Complete for SQS-stack-checking-for-drift: DRIFTED
-2025-02-14T11:44:19.044Z
-🚨 Drift detected! User responsible: unknown@ge.com
-2025-02-14T11:44:19.221Z
-✅ SES Notification Sent to unknown@ge.com! Message ID: 0100019504461eb5-06b8fb08-2453-422c-8798-3c1548fbf626-000000
-2025-02-14T11:44:19.224Z
-END RequestId: 05f00d4f-b550-4fe7-9fa0-6e79db2613bb
+import boto3
+import json
+import time
+
+# Initialize AWS clients
+cloudformation = boto3.client('cloudformation')
+ses = boto3.client('ses')
+
+# SES Configuration
+SES_SENDER_EMAIL = "503356480@ge.com"
+SES_SUBJECT = "🚨 AWS Drift Detected!"
+
+def send_ses_notification(stack_name, sqs_queue, user_email):
+    """Send an SES email when drift is detected."""
+    try:
+        email_body = (
+            f"🚨 *Drift Detected!*\n\n"
+            f"📌 *Stack Name:* {stack_name}\n"
+            f"🔄 *SQS Queue:* {sqs_queue}\n"
+            f"👤 *User Responsible:* {user_email}\n\n"
+            f"Check CloudFormation for further details."
+        )
+
+        response = ses.send_email(
+            Source=SES_SENDER_EMAIL,
+            Destination={"ToAddresses": [user_email]},
+            Message={
+                "Subject": {"Data": SES_SUBJECT},
+                "Body": {"Text": {"Data": email_body}},
+            },
+        )
+
+        print(f"✅ SES Notification Sent to {user_email}! Message ID: {response['MessageId']}")
+
+    except Exception as e:
+        print(f"❌ Error sending SES email: {e}")
+
+def find_stack(sqs_queue_name):
+    """Find the CloudFormation stack managing the given SQS queue."""
+    try:
+        stacks = cloudformation.list_stacks(StackStatusFilter=["CREATE_COMPLETE", "UPDATE_COMPLETE", "ROLLBACK_COMPLETE"])
+        for stack in stacks.get("StackSummaries", []):
+            resources = cloudformation.list_stack_resources(StackName=stack["StackName"])
+            for resource in resources.get("StackResourceSummaries", []):
+                if resource["ResourceType"] == "AWS::SQS::Queue" and "PhysicalResourceId" in resource:
+                    if resource["PhysicalResourceId"].endswith(sqs_queue_name):
+                        print(f"✅ SQS Queue {sqs_queue_name} belongs to stack {stack['StackName']}")
+                        return stack["StackName"]
+        
+        print(f"🚫 No valid stack found for SQS queue {sqs_queue_name}. Skipping drift check.")
+    except Exception as e:
+        print(f"❌ Error finding stack for SQS queue: {e}")
+    
+    return "NO_STACK_FOUND"
+
+def check_drift(stack_name):
+    """Check stack drift status with retry mechanism to handle in-progress detection."""
+    try:
+        existing_drift_status = cloudformation.describe_stacks(StackName=stack_name)
+        
+        if existing_drift_status["Stacks"][0].get("DriftInformation", {}).get("StackDriftStatus") == "DETECTION_IN_PROGRESS":
+            print(f"⚠️ Drift detection is already running for {stack_name}. Skipping new request.")
+            return "IN_PROGRESS"
+
+        response = cloudformation.detect_stack_drift(StackName=stack_name)
+        drift_id = response["StackDriftDetectionId"]
+
+        wait_times = [10, 15, 20, 30, 40]  # Retry up to 5 times (~2 mins total wait)
+        
+        for wait_time in wait_times:
+            time.sleep(wait_time)
+            drift_status = cloudformation.describe_stack_drift_detection_status(StackDriftDetectionId=drift_id)
+            
+            if drift_status["DetectionStatus"] == "DETECTION_COMPLETE":
+                print(f"✅ Drift Check Complete for {stack_name}: {drift_status['StackDriftStatus']}")
+                return drift_status["StackDriftStatus"]
+            
+            print(f"⏳ Waiting {wait_time} sec for drift detection to complete...")
+
+        print(f"⚠️ Drift check taking too long for {stack_name}. Check manually in CloudFormation.")
+        return "UNKNOWN"
+
+    except cloudformation.exceptions.ClientError as e:
+        error_message = str(e)
+        if "Drift detection is already in progress" in error_message:
+            print(f"⚠️ Drift detection already in progress for {stack_name}. Skipping.")
+            return "IN_PROGRESS"
+        else:
+            print(f"❌ Error checking drift: {error_message}")
+            return None
+
+def lambda_handler(event, context):
+    """Triggered by EventBridge when an SQS queue is modified."""
+    try:
+        print("🔹 Received event:", json.dumps(event, indent=2))
+
+        request_parameters = event.get("detail", {}).get("requestParameters", {})
+        sqs_queue_url = request_parameters.get("queueUrl")
+        if not sqs_queue_url:
+            print("⚠️ No SQS queue URL found in event. Skipping.")
+            return {"statusCode": 400, "body": "No valid SQS queue found in event."}
+
+        sqs_queue_name = sqs_queue_url.split("/")[-1]
+
+        user_identity = event["detail"]["userIdentity"]
+        
+        # Extract user who triggered the event
+        if "userName" in user_identity:
+            user_email = f"{user_identity['userName']}@xyz.com"
+        elif "arn" in user_identity:
+            user_arn = user_identity["arn"]
+            user_email = user_arn.split("/")[-1] + "@xyz.com"
+        else:
+            user_email = "Unknown User"
+
+        print(f"🔄 SQS Queue Modified: {sqs_queue_name}, By User: {user_email}")
+
+        stack_name = find_stack(sqs_queue_name)
+        if stack_name != "NO_STACK_FOUND":
+            drift_result = check_drift(stack_name)
+            if drift_result == "DRIFTED":
+                print(f"🚨 Drift detected! User responsible: {user_email}")
+                send_ses_notification(stack_name, sqs_queue_name, user_email)
+            else:
+                print("✅ No drift detected.")
+
+    except Exception as e:
+        print(f"❌ Error processing event: {e}")
+
+    return {"statusCode": 200, "body": "SQS Drift detection complete."}
