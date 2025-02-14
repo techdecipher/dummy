@@ -8,7 +8,7 @@ ses = boto3.client('ses')
 
 # SES Configuration
 SES_SENDER_EMAIL = "503356480@ge.com"
-SES_SUBJECT = "AWS Drift Detected on Stack!"
+SES_SUBJECT = "🚨 AWS Drift Detected!"
 
 def send_ses_notification(stack_name, instance_id, user_email):
     """Send an SES email when drift is detected."""
@@ -50,24 +50,22 @@ def find_stack(instance_id):
         print(f"🚫 No valid stack found for EC2 instance {instance_id}. Skipping drift check.")
     except Exception as e:
         print(f"❌ Error finding stack for EC2 instance: {e}")
-    return None
+    
+    return "NO_STACK_FOUND"
 
 def check_drift(stack_name):
     """Check stack drift status with retry mechanism to handle in-progress detection."""
     try:
-        # First get current Drift Status
         existing_drift_status = cloudformation.describe_stacks(StackName=stack_name)
         
         if existing_drift_status["Stacks"][0].get("DriftInformation", {}).get("StackDriftStatus") == "DETECTION_IN_PROGRESS":
             print(f"⚠️ Drift detection is already running for {stack_name}. Skipping new request.")
             return "IN_PROGRESS"
 
-        # Second Start a New Drift Detection
         response = cloudformation.detect_stack_drift(StackName=stack_name)
         drift_id = response["StackDriftDetectionId"]
 
-        # Third Wait and Check Status with Exponential Backoff
-        wait_times = [10, 15, 20, 30, 40]  # Retry up to 5 times (total wait ~2 mins)
+        wait_times = [10, 15, 20, 30, 40]  # Retry up to 5 times (~2 mins total wait)
         
         for wait_time in wait_times:
             time.sleep(wait_time)
@@ -79,14 +77,7 @@ def check_drift(stack_name):
             
             print(f"⏳ Waiting {wait_time} sec for drift detection to complete...")
 
-        # Step 4: If Drift Detection Is Still In Progress, Send a Warning
-        warning_message = (
-            f"⚠️ Warning: Drift detection on Stack '{stack_name}' has been running for too long.\n"
-            f"🚀 Please check CloudFormation manually."
-        )
-        print(warning_message)
-        send_ses_notification(SES_SUBJECT_WARNING, warning_message, SES_SENDER_EMAIL)
-
+        print(f"⚠️ Drift check taking too long for {stack_name}. Check manually in CloudFormation.")
         return "UNKNOWN"
 
     except cloudformation.exceptions.ClientError as e:
@@ -103,53 +94,31 @@ def lambda_handler(event, context):
     try:
         print("🔹 Received event:", json.dumps(event, indent=2))
         
-        # Extract EC2 instance ID
         request_parameters = event.get("detail", {}).get("requestParameters", {})
-        resource_items = request_parameters.get("resourcesSet", {}).get("items", [])
-        instance_id = resource_items[0].get("resourceId") if resource_items else None
         
-        if not instance_id:
-            print("⚠️ No instanceId found in event. Possibly a DryRun request or malformed event.")
-            return {"statusCode": 400, "body": "No valid EC2 instance found in event."}
-        
-        event_source = event["source"]
-        if event_source != "aws.ec2":
-            print("⚠️ Event is not related to EC2. Skipping.")
-            return {"statusCode": 400, "body": "Unsupported event type"}
-
-        user_identity = event["detail"]["userIdentity"]
-        user_email = "Unknown User"
-        if "userName" in user_identity:
-            user_email = f"{user_identity['userName']}@ge.com"
-        elif "arn" in user_identity:
-            user_arn = user_identity["arn"]
-            user_email = user_arn.split("/")[-1] + "@ge.com"
-
-        request_params = event["detail"].get("requestParameters", {})
-
-        # ✅ Handle different EC2 event types
+        # ✅ Extract EC2 instance ID from event
         instance_id = None
-
-        # For RunInstances event
-        if "instancesSet" in request_params:
-            instances_set = request_params["instancesSet"].get("items", [])
+        if "instancesSet" in request_parameters:
+            instances_set = request_parameters["instancesSet"].get("items", [])
             if instances_set:
                 instance_id = instances_set[0].get("instanceId")
 
-        # For CreateTags event (Tagging EC2)
-        elif "resourcesSet" in request_params:
-            resources_set = request_params["resourcesSet"].get("items", [])
+        if not instance_id and "resourcesSet" in request_parameters:
+            resources_set = request_parameters["resourcesSet"].get("items", [])
             if resources_set:
                 instance_id = resources_set[0].get("resourceId")
 
         if not instance_id:
             print("⚠️ No instanceId found in event. Possibly a DryRun request or malformed event.")
-            return {"statusCode": 400, "body": "Invalid event structure or DryRun request"}
+            return {"statusCode": 400, "body": "No valid EC2 instance found in event."}
+
+        user_identity = event["detail"]["userIdentity"]
+        user_email = f"{user_identity.get('userName', 'unknown')}@xyz.com"
 
         print(f"🔄 EC2 Instance Modified: {instance_id}, By User: {user_email}")
 
         stack_name = find_stack(instance_id)
-        if stack_name:
+        if stack_name != "NO_STACK_FOUND":
             drift_result = check_drift(stack_name)
             if drift_result == "DRIFTED":
                 print(f"🚨 Drift detected! User responsible: {user_email}")
