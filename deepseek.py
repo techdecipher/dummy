@@ -36,6 +36,7 @@ def send_ses_notification(stack_name, resource_name, user_email):
     except Exception as e:
         print(f"Error sending SES email: {e}")
 
+
 def list_all_stacks():
     """Retrieve all CloudFormation stacks including paginated results."""
     stacks = []
@@ -44,8 +45,8 @@ def list_all_stacks():
         stacks.extend(page.get("StackSummaries", []))
     return stacks
 
+
 def find_stack(resource_name, resource_type):
-    def find_stack(resource_name, resource_type):
     """Find the CloudFormation stack managing the given resource, with pagination."""
     try:
         stacks = list_all_stacks()
