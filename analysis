@@ -1,32 +1,160 @@
-import json
-import boto3
-
-def lambda_handler(event, context):
-    """Lambda function to extract username & changed resource details from CloudTrail logs."""
-    
-    # CloudTrail event records
-    records = event.get('Records', [])
-    
-    for record in records:
-        # Extract user identity
-        user_identity = record.get('userIdentity', {})
-        username = user_identity.get('userName', user_identity.get('principalId', 'Unknown User'))
-        
-        # Extract event details
-        event_name = record.get('eventName', 'Unknown Event')
-        event_source = record.get('eventSource', 'Unknown Source')
-        
-        # Extract changed resource details
-        resource_list = record.get('resources', [])
-        if resource_list:
-            for resource in resource_list:
-                resource_type = resource.get('resourceType', 'Unknown Resource Type')
-                resource_name = resource.get('resourceName', 'Unknown Resource Name')
-                print(f"👤 User: {username} | 🔄 Action: {event_name} | 🏷️ Resource: {resource_type} - {resource_name}")
-        else:
-            print(f"👤 User: {username} | 🔄 Action: {event_name} | Source: {event_source} (No direct resource found)")
-
-    return {
-        'statusCode': 200,
-        'body': 'CloudTrail monitoring completed.'
-    }
+2025-02-14T12:12:07.055Z
+INIT_START Runtime Version: python:3.11.v46 Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:84bc5fe9641102b252ebbfd80d16f2791f7bcca59e26ce68d95066317adf4503
+2025-02-14T12:12:07.614Z
+START RequestId: 2f32eaab-c51f-4ca8-b29e-bd3b7075d039 Version: $LATEST
+2025-02-14T12:12:07.614Z
+🔹 Received event: {
+2025-02-14T12:12:07.614Z
+"version": "0",
+2025-02-14T12:12:07.614Z
+"id": "96927447-22e2-62d6-74be-446301772c3f",
+2025-02-14T12:12:07.614Z
+"detail-type": "AWS API Call via CloudTrail",
+2025-02-14T12:12:07.614Z
+"source": "aws.sqs",
+2025-02-14T12:12:07.614Z
+"account": "158366596870",
+2025-02-14T12:12:07.614Z
+"time": "2025-02-14T12:12:01Z",
+2025-02-14T12:12:07.614Z
+"region": "us-east-1",
+2025-02-14T12:12:07.614Z
+"resources": [],
+2025-02-14T12:12:07.614Z
+"detail": {
+2025-02-14T12:12:07.614Z
+"eventVersion": "1.10",
+2025-02-14T12:12:07.614Z
+"userIdentity": {
+2025-02-14T12:12:07.614Z
+"type": "AssumedRole",
+2025-02-14T12:12:07.614Z
+"principalId": "AROASJX3CP4DAYSSJTE4:503430218",
+2025-02-14T12:12:07.614Z
+"arn": "arn:aws:sts::158366596870:assumed-role/bu-ge-dna-cldmgmt-fed/503430218",
+2025-02-14T12:12:07.614Z
+"accountId": "158366596870",
+2025-02-14T12:12:07.614Z
+"accessKeyId": "ASIASJX3CP4DDWCQAQJW",
+2025-02-14T12:12:07.614Z
+"sessionContext": {
+2025-02-14T12:12:07.614Z
+"sessionIssuer": {
+2025-02-14T12:12:07.614Z
+"type": "Role",
+2025-02-14T12:12:07.614Z
+"principalId": "AROASJX3CP4DAYSSJTE4",
+2025-02-14T12:12:07.614Z
+"arn": "arn:aws:iam::158366596870:role/bu-ge-dna-cldmgmt-fed",
+2025-02-14T12:12:07.614Z
+"accountId": "158366596870",
+2025-02-14T12:12:07.614Z
+"userName": "bu-ge-dna-cldmgmt-fed"
+2025-02-14T12:12:07.614Z
+},
+2025-02-14T12:12:07.614Z
+"attributes": {
+2025-02-14T12:12:07.614Z
+"creationDate": "2025-02-14T11:19:30Z",
+2025-02-14T12:12:07.614Z
+"mfaAuthenticated": "false"
+2025-02-14T12:12:07.614Z
+}
+2025-02-14T12:12:07.614Z
+}
+2025-02-14T12:12:07.614Z
+},
+2025-02-14T12:12:07.614Z
+"eventTime": "2025-02-14T12:12:01Z",
+2025-02-14T12:12:07.614Z
+"eventSource": "sqs.amazonaws.com",
+2025-02-14T12:12:07.614Z
+"eventName": "SetQueueAttributes",
+2025-02-14T12:12:07.614Z
+"awsRegion": "us-east-1",
+2025-02-14T12:12:07.614Z
+"sourceIPAddress": "165.156.28.92",
+2025-02-14T12:12:07.614Z
+"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+2025-02-14T12:12:07.614Z
+"requestParameters": {
+2025-02-14T12:12:07.614Z
+"queueUrl": "https://sqs.us-east-1.amazonaws.com/158366596870/drift-test-queue-12-158366596870-us-east-1",
+2025-02-14T12:12:07.614Z
+"attributes": {
+2025-02-14T12:12:07.614Z
+"Policy": "",
+2025-02-14T12:12:07.614Z
+"ReceiveMessageWaitTimeSeconds": "0",
+2025-02-14T12:12:07.614Z
+"SqsManagedSseEnabled": "true",
+2025-02-14T12:12:07.614Z
+"DelaySeconds": "0",
+2025-02-14T12:12:07.614Z
+"KmsMasterKeyId": "",
+2025-02-14T12:12:07.614Z
+"RedrivePolicy": "",
+2025-02-14T12:12:07.614Z
+"MessageRetentionPeriod": "345600",
+2025-02-14T12:12:07.614Z
+"MaximumMessageSize": "262144",
+2025-02-14T12:12:07.614Z
+"VisibilityTimeout": "36",
+2025-02-14T12:12:07.614Z
+"RedriveAllowPolicy": ""
+2025-02-14T12:12:07.614Z
+}
+2025-02-14T12:12:07.614Z
+},
+2025-02-14T12:12:07.614Z
+"responseElements": null,
+2025-02-14T12:12:07.614Z
+"requestID": "f36b2a8d-ad95-57ce-b68a-4aa498c47429",
+2025-02-14T12:12:07.614Z
+"eventID": "656d548b-3ce4-40cb-af53-cad7ec50d7bc",
+2025-02-14T12:12:07.614Z
+"readOnly": false,
+2025-02-14T12:12:07.614Z
+"resources": [
+2025-02-14T12:12:07.614Z
+{
+2025-02-14T12:12:07.614Z
+"accountId": "158366596870",
+2025-02-14T12:12:07.614Z
+"type": "AWS::SQS::Queue",
+2025-02-14T12:12:07.614Z
+"ARN": "arn:aws:sqs:us-east-1:158366596870:drift-test-queue-12-158366596870-us-east-1"
+2025-02-14T12:12:07.614Z
+}
+2025-02-14T12:12:07.614Z
+],
+2025-02-14T12:12:07.614Z
+"eventType": "AwsApiCall",
+2025-02-14T12:12:07.614Z
+"managementEvent": true,
+2025-02-14T12:12:07.614Z
+"recipientAccountId": "158366596870",
+2025-02-14T12:12:07.614Z
+"eventCategory": "Management",
+2025-02-14T12:12:07.614Z
+"tlsDetails": {
+2025-02-14T12:12:07.614Z
+"tlsVersion": "TLSv1.3",
+2025-02-14T12:12:07.614Z
+"cipherSuite": "TLS_AES_128_GCM_SHA256",
+2025-02-14T12:12:07.614Z
+"clientProvidedHostHeader": "sqs.us-east-1.amazonaws.com"
+2025-02-14T12:12:07.614Z
+},
+2025-02-14T12:12:07.614Z
+"sessionCredentialFromConsole": "true"
+2025-02-14T12:12:07.614Z
+}
+2025-02-14T12:12:07.614Z
+}
+2025-02-14T12:12:07.614Z
+SQS Queue Modified: drift-test-queue-12-158366596870-us-east-1, By User: 503430218@ge.com
+2025-02-14T12:12:15.097Z
+No valid stack found for AWS::SQS::Queue drift-test-queue-12-158366596870-us-east-1. Skipping drift check.
+2025-02-14T12:12:15.099Z
+END RequestId: 2f32eaab-c51f-4ca8-b29e-bd3b7075d039
