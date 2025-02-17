@@ -4,18 +4,14 @@
   "detail": {
     "eventSource": ["ec2.amazonaws.com"],
     "eventName": [
-      "ModifyInstanceAttribute",
-      "CreateTags",
       "RunInstances",
-      "AuthorizeSecurityGroupIngress",
-      "RevokeSecurityGroupIngress",
-      "UpdateSecurityGroupRuleDescriptionsIngress",
-      "AuthorizeSecurityGroupEgress",
-      "RevokeSecurityGroupEgress",
-      "UpdateSecurityGroupRuleDescriptionsEgress",
-      "CreateSnapshot",
-      "DeleteSnapshot",
-      "ModifySnapshotAttribute"
+      "StartInstances",
+      "StopInstances",
+      "TerminateInstances",
+      "ModifyInstanceAttribute",
+      "RebootInstances",
+      "CreateTags",
+      "DeleteTags"
     ]
   }
 }
