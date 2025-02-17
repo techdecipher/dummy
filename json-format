@@ -1,17 +1,21 @@
 {
-  "source": ["aws.iam"],
+  "source": ["aws.ec2"],
   "detail-type": ["AWS API Call via CloudTrail"],
   "detail": {
-    "eventSource": ["iam.amazonaws.com"],
+    "eventSource": ["ec2.amazonaws.com"],
     "eventName": [
-      "CreateRole",
-      "DeleteRole",
-      "UpdateRole",
-      "AttachRolePolicy",
-      "DetachRolePolicy",
-      "PutRolePolicy",
-      "DeleteRolePolicy",
-      "UpdateAssumeRolePolicy"
+      "ModifyInstanceAttribute",
+      "CreateTags",
+      "RunInstances",
+      "AuthorizeSecurityGroupIngress",
+      "RevokeSecurityGroupIngress",
+      "UpdateSecurityGroupRuleDescriptionsIngress",
+      "AuthorizeSecurityGroupEgress",
+      "RevokeSecurityGroupEgress",
+      "UpdateSecurityGroupRuleDescriptionsEgress",
+      "CreateSnapshot",
+      "DeleteSnapshot",
+      "ModifySnapshotAttribute"
     ]
   }
 }
