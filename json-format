@@ -3,6 +3,15 @@
   "detail-type": ["AWS API Call via CloudTrail"],
   "detail": {
     "eventSource": ["iam.amazonaws.com"],
-    "eventName": ["DeleteRole", "UpdateRole", ""]
+    "eventName": [
+      "CreateRole",
+      "DeleteRole",
+      "UpdateRole",
+      "AttachRolePolicy",
+      "DetachRolePolicy",
+      "PutRolePolicy",
+      "DeleteRolePolicy",
+      "UpdateAssumeRolePolicy"
+    ]
   }
 }
