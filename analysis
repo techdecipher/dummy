@@ -1,36 +1,8 @@
-2025-02-14T12:26:56.655Z
-INIT_START Runtime Version: python:3.11.v46 Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:84bc5fe9641102b252ebbfd80d16f2791f7bcca59e26ce68d95066317adf4503
-2025-02-14T12:26:56.747Z
-[ERROR] Runtime.UserCodeSyntaxError: Syntax error in module 'lambda_function': expected an indented block after function definition on line 48 (lambda_function.py, line 49) Traceback (most recent call last):   File "/var/task/lambda_function.py" Line 49         """Find the CloudFormation stack managing the given resource, with pagination."""
-2025-02-14T12:26:56.809Z
-INIT_REPORT Init Duration: 153.31 ms Phase: init Status: error Error Type: Runtime.UserCodeSyntaxError
-2025-02-14T12:26:57.165Z
-[ERROR] Runtime.UserCodeSyntaxError: Syntax error in module 'lambda_function': expected an indented block after function definition on line 48 (lambda_function.py, line 49) Traceback (most recent call last):   File "/var/task/lambda_function.py" Line 49         """Find the CloudFormation stack managing the given resource, with pagination."""
-2025-02-14T12:26:57.603Z
-INIT_REPORT Init Duration: 771.59 ms Phase: invoke Status: error Error Type: Runtime.UserCodeSyntaxError
-2025-02-14T12:26:57.603Z
-START RequestId: 74065737-2e49-4c3b-95af-529b363ac5b1 Version: $LATEST
-2025-02-14T12:26:57.624Z
-Unknown application error occurred Runtime.UserCodeSyntaxError
-2025-02-14T12:26:57.624Z
-END RequestId: 74065737-2e49-4c3b-95af-529b363ac5b1
-2025-02-14T12:26:57.624Z
-REPORT RequestId: 74065737-2e49-4c3b-95af-529b363ac5b1 Duration: 792.01 ms Billed Duration: 793 ms Memory Size: 256 MB Max Memory Used: 13 MB
-2025-02-14T12:27:55.925Z
-[ERROR] Runtime.UserCodeSyntaxError: Syntax error in module 'lambda_function': expected an indented block after function definition on line 48 (lambda_function.py, line 49) Traceback (most recent call last):   File "/var/task/lambda_function.py" Line 49         """Find the CloudFormation stack managing the given resource, with pagination."""
-2025-02-14T12:27:56.323Z
-INIT_REPORT Init Duration: 736.35 ms Phase: invoke Status: error Error Type: Runtime.UserCodeSyntaxError
-2025-02-14T12:27:56.323Z
-START RequestId: 74065737-2e49-4c3b-95af-529b363ac5b1 Version: $LATEST
-2025-02-14T12:27:56.324Z
-Unknown application error occurred Runtime.UserCodeSyntaxError
-2025-02-14T12:27:56.324Z
-END RequestId: 74065737-2e49-4c3b-95af-529b363ac5b1
-2025-02-14T12:27:56.324Z
-REPORT RequestId: 74065737-2e49-4c3b-95af-529b363ac5b1 Duration: 737.24 ms Billed Duration: 738 ms Memory Size: 256 MB Max Memory Used: 13 MB
-2025-02-14T12:27:56.342Z
-INIT_START Runtime Version: python:3.11.v46 Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:84bc5fe9641102b252ebbfd80d16f2791f7bcca59e26ce68d95066317adf4503
-2025-02-14T12:27:56.386Z
-[ERROR] Runtime.UserCodeSyntaxError: Syntax error in module 'lambda_function': expected an indented block after function definition on line 48 (lambda_function.py, line 49) Traceback (most recent call last):   File "/var/task/lambda_function.py" Line 49         """Find the CloudFormation stack managing the given resource, with pagination."""
-2025-02-14T12:27:56.429Z
-INIT_REPORT Init Duration: 86.22 ms Phase: init Status: error Error Type: Runtime.UserCodeSyntaxError
+2025-02-17T07:30:47.961Z
+EC2 Instance Modified: i-05a0533b16192875f, By User: 503430218@ge.com
+2025-02-17T07:31:08.723Z
+Error finding stack for AWS::EC2::Instance: An error occurred (AccessDenied) when calling the ListStackResources operation: User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: cloudformation:ListStackResources on resource: arn:aws:cloudformation:us-east-1:158366596870:stack/StackSet-gr-network-firewall-6bd4e9c6-b6a4-48b1-894c-fcd6aeeb453b/088e5dc0-b38a-11ed-9ba9-0e313d0cef47 with an explicit deny in a service control policy
+
+Error finding stack for AWS::EC2::Instance: An error occurred (AccessDenied) when calling the ListStackResources operation: User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: cloudformation:ListStackResources on resource: arn:aws:cloudformation:us-east-1:158366596870:stack/StackSet-gr-network-firewall-6bd4e9c6-b6a4-48b1-894c-fcd6aeeb453b/088e5dc0-b38a-11ed-9ba9-0e313d0cef47 with an explicit deny in a service control policy
+2025-02-17T07:31:08.735Z
+END RequestId: 2fa4dcda-f04d-43b3-ae40-11b888325212
