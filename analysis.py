@@ -1,13 +1,13 @@
-# Handling Lambda Drift Detection
-elif event_source == "aws.lambda":
+# Handling VPC Drift Detection
+elif event_source == "aws.ec2":
     request_parameters = event.get("detail", {}).get("requestParameters", {})
-    function_name = request_parameters.get("functionName")
+    vpc_id = request_parameters.get("vpcId")
 
-    if not function_name:
-        print("⚠️ No Lambda function name found in event. Skipping.")
-        return {"statusCode": 400, "body": "No valid Lambda function found in event."}
+    if not vpc_id:
+        print("⚠️ No VPC ID found in event. Skipping.")
+        return {"statusCode": 400, "body": "No valid VPC found in event."}
 
-    print(f"🔄 Lambda Function Modified: {function_name}, By User: {user_email}")
+    print(f"🔄 VPC Modified: {vpc_id}, By User: {user_email}")
 
-    stack_name = find_stack(function_name, "AWS::Lambda::Function")
-    resource_name = function_name
+    stack_name = find_stack(vpc_id, "AWS::EC2::VPC")
+    resource_name = vpc_id
