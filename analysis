@@ -1,10 +1,8 @@
- sagemaker_resource = (
-        request_parameters.get("notebookInstanceName") or
-        request_parameters.get("trainingJobName") or
-        request_parameters.get("modelName") or
-        request_parameters.get("endpointName")
-    )
-
-    if not sagemaker_resource:
-        print("⚠️ No SageMaker resource found in event. Skipping.")
-        return {"statusCode": 400, "body": "No valid SageMaker resource found in event."}
+if "notebookInstanceName" in request_parameters:
+        resource_type = "AWS::SageMaker::NotebookInstance"
+    elif "trainingJobName" in request_parameters:
+        resource_type = "AWS::SageMaker::TrainingJob"
+    elif "modelName" in request_parameters:
+        resource_type = "AWS::SageMaker::Model"
+    elif "endpointName" in request_parameters:
+        resource_type = "AWS::SageMaker::Endpoint"
