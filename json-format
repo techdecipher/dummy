@@ -1,17 +1,12 @@
-{
-  "source": ["aws.ec2"],
-  "detail-type": ["AWS API Call via CloudTrail"],
-  "detail": {
-    "eventSource": ["ec2.amazonaws.com"],
-    "eventName": [
-      "RunInstances",
-      "StartInstances",
-      "StopInstances",
-      "TerminateInstances",
-      "ModifyInstanceAttribute",
-      "RebootInstances",
-      "CreateTags",
-      "DeleteTags"
-    ]
-  }
-}
+elif event_source == "aws.ec2" and event_name in [
+    "CreateVpc",
+    "DeleteVpc",
+    "ModifyVpcAttribute",
+    "CreateSubnet",
+    "DeleteSubnet",
+    "ModifySubnetAttribute",
+    "CreateInternetGateway",
+    "AttachInternetGateway",
+    "DetachInternetGateway",
+    "DeleteInternetGateway"
+]:
