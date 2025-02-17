@@ -3,14 +3,6 @@
   "detail-type": ["AWS API Call via CloudTrail"],
   "detail": {
     "eventSource": ["dynamodb.amazonaws.com"],
-    "eventName": [
-      "CreateTable",
-      "UpdateTable",
-      "DeleteTable",
-      "UpdateTableReplicaAutoScaling",
-      "PutItem",
-      "DeleteItem",
-      "UpdateItem"
-    ]
+    "eventName": ["UpdateTable", "DeleteTable", "DeleteItem", "UpdateItem"]
   }
 }
