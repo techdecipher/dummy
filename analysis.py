@@ -1,13 +1,13 @@
-# Handling EFS Drift Detection
-elif event_source == "aws.efs":
+# Handling ELB Drift Detection
+elif event_source == "aws.elasticloadbalancing":
     request_parameters = event.get("detail", {}).get("requestParameters", {})
-    efs_id = request_parameters.get("fileSystemId")  # EFS File System ID
+    elb_name = request_parameters.get("loadBalancerName")  # ELB Name
 
-    if not efs_id:
-        print("⚠️ No EFS FileSystem ID found in event. Skipping.")
-        return {"statusCode": 400, "body": "No valid EFS FileSystem found in event."}
+    if not elb_name:
+        print("⚠️ No ELB name found in event. Skipping.")
+        return {"statusCode": 400, "body": "No valid ELB found in event."}
 
-    print(f"🔄 EFS File System Modified: {efs_id}, By User: {user_email}")
+    print(f"🔄 ELB Modified: {elb_name}, By User: {user_email}")
 
-    stack_name = find_stack(efs_id, "AWS::EFS::FileSystem")
-    resource_name = efs_id
+    stack_name = find_stack(elb_name, "AWS::ElasticLoadBalancing::LoadBalancer")
+    resource_name = elb_name
