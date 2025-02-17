@@ -1,8 +1,16 @@
 {
-  "source": ["aws.dynamodb"],
+  "source": ["aws.rds"],
   "detail-type": ["AWS API Call via CloudTrail"],
   "detail": {
-    "eventSource": ["dynamodb.amazonaws.com"],
-    "eventName": ["UpdateTable", "DeleteTable", "DeleteItem", "UpdateItem"]
+    "eventSource": ["rds.amazonaws.com"],
+    "eventName": [
+      "CreateDBInstance",
+      "ModifyDBInstance",
+      "DeleteDBInstance",
+      "CreateDBCluster",
+      "ModifyDBCluster",
+      "DeleteDBCluster",
+      "ModifyDBParameterGroup"
+    ]
   }
 }
