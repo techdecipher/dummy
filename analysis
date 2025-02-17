@@ -1,8 +1,10 @@
-2025-02-17T07:30:47.961Z
-EC2 Instance Modified: i-05a0533b16192875f, By User: 503430218@ge.com
-2025-02-17T07:31:08.723Z
-Error finding stack for AWS::EC2::Instance: An error occurred (AccessDenied) when calling the ListStackResources operation: User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: cloudformation:ListStackResources on resource: arn:aws:cloudformation:us-east-1:158366596870:stack/StackSet-gr-network-firewall-6bd4e9c6-b6a4-48b1-894c-fcd6aeeb453b/088e5dc0-b38a-11ed-9ba9-0e313d0cef47 with an explicit deny in a service control policy
+ sagemaker_resource = (
+        request_parameters.get("notebookInstanceName") or
+        request_parameters.get("trainingJobName") or
+        request_parameters.get("modelName") or
+        request_parameters.get("endpointName")
+    )
 
-Error finding stack for AWS::EC2::Instance: An error occurred (AccessDenied) when calling the ListStackResources operation: User: arn:aws:sts::158366596870:assumed-role/fdl-infra-drift-detection-role-ylzy7rdd/fdl-infra-drift-detection is not authorized to perform: cloudformation:ListStackResources on resource: arn:aws:cloudformation:us-east-1:158366596870:stack/StackSet-gr-network-firewall-6bd4e9c6-b6a4-48b1-894c-fcd6aeeb453b/088e5dc0-b38a-11ed-9ba9-0e313d0cef47 with an explicit deny in a service control policy
-2025-02-17T07:31:08.735Z
-END RequestId: 2fa4dcda-f04d-43b3-ae40-11b888325212
+    if not sagemaker_resource:
+        print("⚠️ No SageMaker resource found in event. Skipping.")
+        return {"statusCode": 400, "body": "No valid SageMaker resource found in event."}
