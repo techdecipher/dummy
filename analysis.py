@@ -1,5 +1,16 @@
 # Handling VPC Drift Detection
-elif event_source == "aws.ec2":
+elif event_source == "aws.ec2" and event["detail"]["eventName"] in [
+    "CreateVpc",
+    "DeleteVpc",
+    "ModifyVpcAttribute",
+    "AssociateVpcCidrBlock",
+    "DisassociateVpcCidrBlock",
+    "ModifyVpcTenancy",
+    "AcceptVpcPeeringConnection",
+    "DeleteVpcPeeringConnection",
+    "ModifyVpcEndpoint",
+    "ModifyVpcPeeringConnectionOptions"
+]:
     request_parameters = event.get("detail", {}).get("requestParameters", {})
     vpc_id = request_parameters.get("vpcId")
 
