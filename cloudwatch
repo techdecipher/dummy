@@ -1,17 +1,402 @@
-{
-  "source": ["aws.cloudtrail"],
-  "detail-type": ["AWS API Call via CloudTrail"],
-  "detail": {
-    "eventSource": [
-      "ec2.amazonaws.com",
-      "s3.amazonaws.com",
-      "iam.amazonaws.com",
-      "rds.amazonaws.com",
-      "lambda.amazonaws.com",
-      "dynamodb.amazonaws.com",
-      "cloudwatch.amazonaws.com"
-    ],
-    "eventCategory": ["Management"],
-    "readOnly": [false]
-  }
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
 }
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"responseElements": {
+2025-02-20T17:55:48.787Z
+"pipeline": {
+2025-02-20T17:55:48.787Z
+"name": "gev-gp-af-platform-innov-pipeline",
+2025-02-20T17:55:48.787Z
+"roleArn": "arn:aws:iam::158366596870:role/service-role/AWSCodePipelineServiceRole-us-east-1-ss-git-pipe",
+2025-02-20T17:55:48.787Z
+"artifactStore": {
+2025-02-20T17:55:48.787Z
+"type": "S3",
+2025-02-20T17:55:48.787Z
+"location": "codepipeline-us-east-1-512199469946"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"stages": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "Source-Stage",
+2025-02-20T17:55:48.787Z
+"actions": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "Build-Source",
+2025-02-20T17:55:48.787Z
+"actionTypeId": {
+2025-02-20T17:55:48.787Z
+"category": "Source",
+2025-02-20T17:55:48.787Z
+"owner": "AWS",
+2025-02-20T17:55:48.787Z
+"provider": "CodeStarSourceConnection",
+2025-02-20T17:55:48.787Z
+"version": "1"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"runOrder": 1,
+2025-02-20T17:55:48.787Z
+"configuration": {
+2025-02-20T17:55:48.787Z
+"ConnectionArn": "arn:aws:codeconnections:us-east-1:158366596870:connection/c04d56f9-24e7-49ec-9da6-f2e80b2eeabe",
+2025-02-20T17:55:48.787Z
+"BranchName": "dev",
+2025-02-20T17:55:48.787Z
+"OutputArtifactFormat": "CODE_ZIP",
+2025-02-20T17:55:48.787Z
+"FullRepositoryId": "GEV-SoX-DataBricks/gp_ach_repo"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"outputArtifacts": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "source_artifacts"
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+],
+2025-02-20T17:55:48.787Z
+"inputArtifacts": [],
+2025-02-20T17:55:48.787Z
+"region": "us-east-1"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "Airflow-Source",
+2025-02-20T17:55:48.787Z
+"actionTypeId": {
+2025-02-20T17:55:48.787Z
+"category": "Source",
+2025-02-20T17:55:48.787Z
+"owner": "AWS",
+2025-02-20T17:55:48.787Z
+"provider": "CodeStarSourceConnection",
+2025-02-20T17:55:48.787Z
+"version": "1"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"runOrder": 1,
+2025-02-20T17:55:48.787Z
+"configuration": {
+2025-02-20T17:55:48.787Z
+"ConnectionArn": "arn:aws:codeconnections:us-east-1:158366596870:connection/c04d56f9-24e7-49ec-9da6-f2e80b2eeabe",
+2025-02-20T17:55:48.787Z
+"BranchName": "dev",
+2025-02-20T17:55:48.787Z
+"OutputArtifactFormat": "CODE_ZIP",
+2025-02-20T17:55:48.787Z
+"FullRepositoryId": "GEV-SoX-DataBricks/hq_af_efs"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"outputArtifacts": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "source_artifactsAf"
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+],
+2025-02-20T17:55:48.787Z
+"inputArtifacts": [],
+2025-02-20T17:55:48.787Z
+"region": "us-east-1"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "s4",
+2025-02-20T17:55:48.787Z
+"actionTypeId": {
+2025-02-20T17:55:48.787Z
+"category": "Source",
+2025-02-20T17:55:48.787Z
+"owner": "AWS",
+2025-02-20T17:55:48.787Z
+"provider": "CodeStarSourceConnection",
+2025-02-20T17:55:48.787Z
+"version": "1"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"runOrder": 1,
+2025-02-20T17:55:48.787Z
+"configuration": {
+2025-02-20T17:55:48.787Z
+"ConnectionArn": "arn:aws:codeconnections:us-east-1:158366596870:connection/c04d56f9-24e7-49ec-9da6-f2e80b2eeabe",
+2025-02-20T17:55:48.787Z
+"BranchName": "innov",
+2025-02-20T17:55:48.787Z
+"OutputArtifactFormat": "CODE_ZIP",
+2025-02-20T17:55:48.787Z
+"FullRepositoryId": "GEV-SoX-DataBricks/GP_PLATFORM_DBR"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"outputArtifacts": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "op5"
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+],
+2025-02-20T17:55:48.787Z
+"inputArtifacts": [],
+2025-02-20T17:55:48.787Z
+"region": "us-east-1"
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "Build_Deploy",
+2025-02-20T17:55:48.787Z
+"actions": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "Build-Artifacts",
+2025-02-20T17:55:48.787Z
+"actionTypeId": {
+2025-02-20T17:55:48.787Z
+"category": "Build",
+2025-02-20T17:55:48.787Z
+"owner": "AWS",
+2025-02-20T17:55:48.787Z
+"provider": "CodeBuild",
+2025-02-20T17:55:48.787Z
+"version": "1"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"runOrder": 1,
+2025-02-20T17:55:48.787Z
+"configuration": {
+2025-02-20T17:55:48.787Z
+"EnvironmentVariables": "****",
+2025-02-20T17:55:48.787Z
+"ProjectName": "gev-gp-af-platform-innov-build",
+2025-02-20T17:55:48.787Z
+"PrimarySource": "source_artifacts"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"outputArtifacts": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "build_artifacts"
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+],
+2025-02-20T17:55:48.787Z
+"inputArtifacts": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "source_artifacts"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"name": "source_artifactsAf"
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+],
+2025-02-20T17:55:48.787Z
+"version": 108,
+2025-02-20T17:55:48.787Z
+"executionMode": "SUPERSEDED",
+2025-02-20T17:55:48.787Z
+"pipelineType": "V2",
+2025-02-20T17:55:48.787Z
+"triggers": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"providerType": "CodeStarSourceConnection",
+2025-02-20T17:55:48.787Z
+"gitConfiguration": {
+2025-02-20T17:55:48.787Z
+"sourceActionName": "Build-Source",
+2025-02-20T17:55:48.787Z
+"pullRequest": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"events": [
+2025-02-20T17:55:48.787Z
+"CLOSED"
+2025-02-20T17:55:48.787Z
+],
+2025-02-20T17:55:48.787Z
+"branches": {
+2025-02-20T17:55:48.787Z
+"excludes": [
+2025-02-20T17:55:48.787Z
+"main",
+2025-02-20T17:55:48.787Z
+"dev",
+2025-02-20T17:55:48.787Z
+"devops-pipeline"
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"providerType": "CodeStarSourceConnection",
+2025-02-20T17:55:48.787Z
+"gitConfiguration": {
+2025-02-20T17:55:48.787Z
+"sourceActionName": "Airflow-Source",
+2025-02-20T17:55:48.787Z
+"push": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"branches": {
+2025-02-20T17:55:48.787Z
+"includes": [
+2025-02-20T17:55:48.787Z
+"dev"
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"filePaths": {
+2025-02-20T17:55:48.787Z
+"excludes": [
+2025-02-20T17:55:48.787Z
+".github/CODEOWNERS"
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"providerType": "CodeStarSourceConnection",
+2025-02-20T17:55:48.787Z
+"gitConfiguration": {
+2025-02-20T17:55:48.787Z
+"sourceActionName": "s4",
+2025-02-20T17:55:48.787Z
+"push": [
+2025-02-20T17:55:48.787Z
+{
+2025-02-20T17:55:48.787Z
+"branches": {
+2025-02-20T17:55:48.787Z
+"includes": [
+2025-02-20T17:55:48.787Z
+"innov"
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+]
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"requestID": "6a7b1706-2ac9-49db-bf17-cdf5183f90e5",
+2025-02-20T17:55:48.787Z
+"eventID": "d4b30ee4-9f16-46a9-8663-baab6f54a1ca",
+2025-02-20T17:55:48.787Z
+"readOnly": false,
+2025-02-20T17:55:48.787Z
+"eventType": "AwsApiCall",
+2025-02-20T17:55:48.787Z
+"managementEvent": true,
+2025-02-20T17:55:48.787Z
+"recipientAccountId": "158366596870",
+2025-02-20T17:55:48.787Z
+"eventCategory": "Management",
+2025-02-20T17:55:48.787Z
+"tlsDetails": {
+2025-02-20T17:55:48.787Z
+"tlsVersion": "TLSv1.3",
+2025-02-20T17:55:48.787Z
+"cipherSuite": "TLS_AES_128_GCM_SHA256",
+2025-02-20T17:55:48.787Z
+"clientProvidedHostHeader": "codepipeline.us-east-1.amazonaws.com"
+2025-02-20T17:55:48.787Z
+},
+2025-02-20T17:55:48.787Z
+"sessionCredentialFromConsole": "true"
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+}
+2025-02-20T17:55:48.787Z
+recipient_account_id: None
+
+recipient_account_id: None
+2025-02-20T17:55:48.787Z
+account type mapping: {'158366596870': 'Innovation', '222222222222': 'Production', '333333333333': 'Development'}
+
+account type mapping: {'158366596870': 'Innovation', '222222222222': 'Production', '333333333333': 'Development'}
