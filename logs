@@ -1,0 +1,1 @@
+Resource handler returned message: "Function not found: arn:aws:lambda:us-east-1:753928799879:function:sam-Drift-detection-automation-infra-drift-detection (Service: Lambda, Status Code: 404, Request ID: 95145aae-a7b2-4419-bc91-a3290ba00f9b)" (RequestToken: bb718c1b-e174-4e4a-678000-717983e780c, HandlerErrorCode: NotFound
