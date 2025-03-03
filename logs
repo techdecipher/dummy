@@ -1,1 +1,342 @@
-Resource handler returned message: "Function not found: arn:aws:lambda:us-east-1:753928799879:function:sam-Drift-detection-automation-infra-drift-detection (Service: Lambda, Status Code: 404, Request ID: 95145aae-a7b2-4419-bc91-a3290ba00f9b)" (RequestToken: bb718c1b-e174-4e4a-678000-717983e780c, HandlerErrorCode: NotFound
+2025-03-03T10:33:59.119Z
+INIT_START Runtime Version: python:3.11.v46 Runtime Version ARN: arn:aws:lambda:us-east-1::runtime:84bc5fe9641102b252ebbfd80d16f2791f7bcca59e26ce68d95066317adf4503
+2025-03-03T10:33:59.511Z
+START RequestId: 1d939e3a-b75e-46ec-84f1-d27c09be350d Version: $LATEST
+2025-03-03T10:33:59.511Z
+Received event: {
+2025-03-03T10:33:59.511Z
+"version": "0",
+2025-03-03T10:33:59.511Z
+"id": "a679fb4d-3601-448a-9f13-1882971641c6",
+2025-03-03T10:33:59.511Z
+"detail-type": "AWS API Call via CloudTrail",
+2025-03-03T10:33:59.511Z
+"source": "aws.ec2",
+2025-03-03T10:33:59.511Z
+"account": "753920291680",
+2025-03-03T10:33:59.511Z
+"time": "2025-03-03T10:33:55Z",
+2025-03-03T10:33:59.511Z
+"region": "us-east-1",
+2025-03-03T10:33:59.511Z
+"resources": [],
+2025-03-03T10:33:59.511Z
+"detail": {
+2025-03-03T10:33:59.511Z
+"eventVersion": "1.10",
+2025-03-03T10:33:59.511Z
+"userIdentity": {
+2025-03-03T10:33:59.511Z
+"type": "AssumedRole",
+2025-03-03T10:33:59.511Z
+"principalId": "AROA27CJGWNQKSJU65NRL:databricks",
+2025-03-03T10:33:59.511Z
+"arn": "arn:aws:sts::753920291680:assumed-role/bu-dna-dao-dbr-hq-cross-role/databricks",
+2025-03-03T10:33:59.511Z
+"accountId": "753920291680",
+2025-03-03T10:33:59.511Z
+"accessKeyId": "ASIA27CJGWNQAH6OMTMO",
+2025-03-03T10:33:59.511Z
+"sessionContext": {
+2025-03-03T10:33:59.511Z
+"sessionIssuer": {
+2025-03-03T10:33:59.511Z
+"type": "Role",
+2025-03-03T10:33:59.511Z
+"principalId": "AROA27CJGWNQKSJU65NRL",
+2025-03-03T10:33:59.511Z
+"arn": "arn:aws:iam::753920291680:role/bu-dna-dao-dbr-hq-cross-role",
+2025-03-03T10:33:59.511Z
+"accountId": "753920291680",
+2025-03-03T10:33:59.511Z
+"userName": "bu-dna-dao-dbr-hq-cross-role"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+"attributes": {
+2025-03-03T10:33:59.511Z
+"creationDate": "2025-03-03T10:27:03Z",
+2025-03-03T10:33:59.511Z
+"mfaAuthenticated": "false"
+2025-03-03T10:33:59.511Z
+}
+2025-03-03T10:33:59.511Z
+}
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+"eventTime": "2025-03-03T10:33:55Z",
+2025-03-03T10:33:59.511Z
+"eventSource": "ec2.amazonaws.com",
+2025-03-03T10:33:59.511Z
+"eventName": "CreateTags",
+2025-03-03T10:33:59.511Z
+"awsRegion": "us-east-1",
+2025-03-03T10:33:59.511Z
+"sourceIPAddress": "54.156.226.103",
+2025-03-03T10:33:59.511Z
+"userAgent": "aws-sdk-java/1.12.779 Linux/5.4.0-1137-aws-fips Java_HotSpot(TM)_64-Bit_Server_VM/17.0.12+8-LTS-jvmci-23.0-b41 java/17.0.12 scala/2.12.18-bin-db-4-4f162f8 kotlin/1.8.21 vendor/Oracle_Corporation cfg/retry-mode/legacy cfg/auth-source#STSAssumeRoleCredentialsProvider",
+2025-03-03T10:33:59.511Z
+"requestParameters": {
+2025-03-03T10:33:59.511Z
+"resourcesSet": {
+2025-03-03T10:33:59.511Z
+"items": [
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"resourceId": "i-0e9bc4c450e0c652e"
+2025-03-03T10:33:59.511Z
+}
+2025-03-03T10:33:59.511Z
+]
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+"tagSet": {
+2025-03-03T10:33:59.511Z
+"items": [
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "ClusterId",
+2025-03-03T10:33:59.511Z
+"value": "0303-103348-wv3eyak2"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "business",
+2025-03-03T10:33:59.511Z
+"value": "hq"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "DOMAIN_NAME",
+2025-03-03T10:33:59.511Z
+"value": "AP"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "Name",
+2025-03-03T10:33:59.511Z
+"value": "workerenv-1736447610121350-e92404a1-16be-41dd-9861-6d7be67bf7e7-worker"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "project",
+2025-03-03T10:33:59.511Z
+"value": "FDL"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "management_service",
+2025-03-03T10:33:59.511Z
+"value": "instance_manager_service"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "ClusterName",
+2025-03-03T10:33:59.511Z
+"value": "job-72272223484081-run-487553590859359-fdl_dbjob_etl_generic_sf_master_job_cluster"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "SOURCE",
+2025-03-03T10:33:59.511Z
+"value": "GEV_CCL_FUSION"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "domain",
+2025-03-03T10:33:59.511Z
+"value": "hq-fdl"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "JobId",
+2025-03-03T10:33:59.511Z
+"value": "72272223484081"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "jb_business_unit_name",
+2025-03-03T10:33:59.511Z
+"value": "HQ"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "RunName",
+2025-03-03T10:33:59.511Z
+"value": "fdl_dbjob_etl_generic_sf_master_job"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "Creator",
+2025-03-03T10:33:59.511Z
+"value": "Dinesh.Shetty@ge.com"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "uai",
+2025-03-03T10:33:59.511Z
+"value": "uai3060967"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "Vendor",
+2025-03-03T10:33:59.511Z
+"value": "Databricks"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "jb_env",
+2025-03-03T10:33:59.511Z
+"value": "dev"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "UAI",
+2025-03-03T10:33:59.511Z
+"value": "UAI3047138"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "category",
+2025-03-03T10:33:59.511Z
+"value": "operations"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "app",
+2025-03-03T10:33:59.511Z
+"value": "Databricks"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "jb_sub_domain_code",
+2025-03-03T10:33:59.511Z
+"value": "GEV_CCL_FUSION"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "jb_owner",
+2025-03-03T10:33:59.511Z
+"value": "airflow"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "jb_domain_name",
+2025-03-03T10:33:59.511Z
+"value": "AP"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "Technology",
+2025-03-03T10:33:59.511Z
+"value": "AutoScaling"
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+{
+2025-03-03T10:33:59.511Z
+"key": "env",
+2025-03-03T10:33:59.511Z
+"value": "dev"
+2025-03-03T10:33:59.511Z
+}
+2025-03-03T10:33:59.511Z
+]
+2025-03-03T10:33:59.511Z
+}
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+"responseElements": {
+2025-03-03T10:33:59.511Z
+"requestId": "ff46438d-6d07-40b5-b6ec-ba6c18d2627f",
+2025-03-03T10:33:59.511Z
+"_return": true
+2025-03-03T10:33:59.511Z
+},
+2025-03-03T10:33:59.511Z
+"requestID": "ff46438d-6d07-40b5-b6ec-ba6c18d2627f",
+2025-03-03T10:33:59.511Z
+"eventID": "d30971a8-231a-4d76-a8dc-de10dd5fb442",
+2025-03-03T10:33:59.511Z
+"readOnly": false,
+2025-03-03T10:33:59.511Z
+"eventType": "AwsApiCall",
+2025-03-03T10:33:59.511Z
+"managementEvent": true,
+2025-03-03T10:33:59.511Z
+"recipientAccountId": "753920291680",
+2025-03-03T10:33:59.511Z
+"eventCategory": "Management",
+2025-03-03T10:33:59.511Z
+"tlsDetails": {
+2025-03-03T10:33:59.511Z
+"tlsVersion": "TLSv1.3",
+2025-03-03T10:33:59.511Z
+"cipherSuite": "TLS_AES_128_GCM_SHA256",
+2025-03-03T10:33:59.511Z
+"clientProvidedHostHeader": "ec2.us-east-1.amazonaws.com"
+2025-03-03T10:33:59.511Z
+}
+2025-03-03T10:33:59.511Z
+}
+2025-03-03T10:33:59.511Z
+}
+2025-03-03T10:33:59.511Z
+EC2 Instance Modified: i-0e9bc4c450e0c652e, By User: databricks@ge.com
+2025-03-03T10:34:02.701Z
+Error finding stack for AWS::EC2::Instance: An error occurred (Throttling) when calling the ListStacks operation (reached max retries: 4): Rate exceeded
+
+Error finding stack for AWS::EC2::Instance: An error occurred (Throttling) when calling the ListStacks operation (reached max retries: 4): Rate exceeded
+2025-03-03T10:34:02.703Z
+END RequestId: 1d939e3a-b75e-46ec-84f1-d27c09be350d
+2025-03-03T10:34:02.703Z
+REPORT RequestId: 1d939e3a-b75e-46ec-84f1-d27c09be350d Duration: 3192.84 ms Billed Duration: 3193 ms Memory
