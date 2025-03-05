@@ -1,38 +1,505 @@
-version: 0.2
-
-phases:
-  pre_build:
-    commands:
-      - echo "Starting pre-build phase..."
-
-      # Define variables
-      - |
-        GITHUB_API_URL="https://api.github.com"
-        ORG_NAME="your-org-name"
-        GITHUB_PAT="$GITHUB_PAT"
-        PER_PAGE=100  # Number of results per page
-        PAGE=1
-        ALL_MEMBERS=""
-
-      # Fetch all members across multiple pages
-      - |
-        while true; do
-          RESPONSE=$(curl -s -H "Authorization: token $GITHUB_PAT" \
-              "$GITHUB_API_URL/orgs/$ORG_NAME/members?page=$PAGE&per_page=$PER_PAGE")
-
-          # Check if response is empty or error occurred
-          if [ -z "$RESPONSE" ] || [ "$RESPONSE" == "[]" ]; then
-            break
-          fi
-
-          MEMBERS=$(echo "$RESPONSE" | jq -r '.[].login')
-          if [ -n "$MEMBERS" ]; then
-            ALL_MEMBERS+="$MEMBERS"$'\n'
-          fi
-
-          echo "Fetched page $PAGE"
-          ((PAGE++))
-        done
-
-      - echo "All members fetched:"
-      - echo "$ALL_MEMBERS"
+# This AWS SAM template has been generated from your function's configuration. If
+# your function has one or more triggers, note that the AWS resources associated
+# with these triggers aren't fully specified in this template and include
+# placeholder values. Open this template in AWS Infrastructure Composer or your
+# favorite IDE and modify it to specify a serverless application with other AWS
+# resources.
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: An AWS Serverless Application Model template describing your function.
+Resources:
+  saminfradriftdetection:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Description: ''
+      MemorySize: 256
+      Timeout: 480
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.11
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+      PackageType: Zip
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1:15836659688:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:15836659688:log-group:/aws/lambda/sam-infra-drift-detection:*
+            - Sid: PermitNetworkFirewall
+              Effect: Allow
+              Action:
+                - network-firewall:*
+              Resource: '*'
+            - Sid: PermitCF
+              Effect: Allow
+              Action:
+                - cloudformation:*
+              Resource:
+                - arn:aws:cloudformation:*:*:stack/StackSet-gr-network-firewall*
+                - arn:aws:cloudformation:*:*:stack/StackSet-gr-egress-tester*
+            - Sid: AllowSNS
+              Effect: Allow
+              Action:
+                - sns:*
+                - iam:CreateServiceLinkedRole
+              Resource: '*'
+            - Sid: PermitEc2Actions
+              Effect: Allow
+              Action:
+                - ec2:DeleteSecurityGroup
+                - ec2:DeleteRouteTable
+                - ec2:DeleteNatGateway
+                - ec2:DeleteNetworkAcl
+                - ec2:DeleteTags
+                - ec2:DeleteNetworkAclEntry
+                - ec2:AssociateRouteTable
+                - ec2:DisassociateRouteTable
+                - ec2:CreateRouteTable
+                - ec2:CreateNatGateway
+                - ec2:CreateNetworkAcl
+                - ec2:CreateTags
+                - ec2:CreateNetworkAclEntry
+                - ec2:CreateSecurityGroup
+                - ec2:CreateRoute
+                - ec2:DeleteRoute
+                - ec2:AssociateAddress
+                - ec2:DisassociateAddress
+                - ec2:DescribeSubnets
+                - ec2:DescribeVpcs
+                - ec2:DescribeNetworkInterfaces
+                - ec2:DescribeSecurityGroups
+                - ec2:DescribeAvailabilityZones
+                - ec2:DescribeNatGateways
+                - ec2:DescribeRouteTables
+                - ec2:DescribeNetworkAcls
+                - ec2:ReplaceNetworkAclAssociation
+                - ec2:ReplaceRouteTableAssociation
+                - ec2:ReplaceRoute
+              Resource: '*'
+            - Sid: PermitIam
+              Effect: Allow
+              Action:
+                - iam:CreateRole
+                - iam:DeleteRole
+                - iam:AttachRolePolicy
+                - iam:DetachRolePolicy
+                - iam:GetRole
+                - iam:PassRole
+              Resource:
+                - arn:aws:lambda:*:*:function:StackSet-gr-egress-tester*
+                - arn:aws:iam::*:role/StackSet-gr-egress-tester*
+                - arn:aws:iam::*:role/StackSet-gr-network-firewall*
+            - Sid: PermitLogging
+              Effect: Allow
+              Action:
+                - logs:*
+              Resource: '*'
+            - Sid: PermitLambda
+              Effect: Allow
+              Action:
+                - lambda:GetFunctionConfiguration
+                - lambda:CreateFunction
+                - lambda:DeleteFunction
+                - lambda:GetFunction
+                - iam:PassRole
+                - lambda:TagResource
+                - lambda:UntagResource
+                - lambda:ListTags
+              Resource:
+                - arn:aws:lambda:*:*:function:StackSet-gr-egress-tester*
+                - arn:aws:iam::*:role/StackSet-gr-egress-tester*
+            - Sid: PermitLoggingIam
+              Effect: Allow
+              Action:
+                - iam:CreateRole
+                - iam:DeleteRole
+                - iam:AttachRolePolicy
+                - iam:DetachRolePolicy
+                - iam:GetRole
+                - iam:PassRole
+                - iam:PutRolePolicy
+                - iam:DeleteRolePolicy
+              Resource: arn:aws:iam::*:role/CWLtoSubscriptionFilterRole-*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource: arn:aws:logs:us-east-1:158366596870:*
+            - Effect: Allow
+              Action:
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource:
+                - >-
+                  arn:aws:logs:us-east-1:158366596870:log-group:/aws/lambda/sam-infra-drift-detection:*
+            - Effect: Allow
+              Action:
+                - ses:*
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - kms:CreateAlias
+                - kms:CreateKey
+                - kms:DeleteAlias
+                - kms:Describe*
+                - kms:GenerateRandom
+                - kms:Get*
+                - kms:List*
+                - kms:TagResource
+                - kms:UntagResource
+                - iam:ListGroups
+                - iam:ListRoles
+                - iam:ListUsers
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - s3:*
+                - s3-object-lambda:*
+              Resource: '*'
+            - Sid: EventBridgeActions
+              Effect: Allow
+              Action:
+                - events:*
+                - schemas:*
+                - scheduler:*
+                - pipes:*
+              Resource: '*'
+            - Sid: IAMCreateServiceLinkedRoleForApiDestinations
+              Effect: Allow
+              Action:
+                - iam:CreateServiceLinkedRole
+              Resource: >-
+                arn:aws:iam::*:role/aws-service-role/apidestinations.events.amazonaws.com/AWSServiceRoleForAmazonEventBridgeApiDestinations
+              Condition:
+                StringEquals:
+                  iam:AWSServiceName: apidestinations.events.amazonaws.com
+            - Sid: IAMCreateServiceLinkedRoleForAmazonEventBridgeSchemas
+              Effect: Allow
+              Action:
+                - iam:CreateServiceLinkedRole
+              Resource: >-
+                arn:aws:iam::*:role/aws-service-role/schemas.amazonaws.com/AWSServiceRoleForSchemas
+              Condition:
+                StringEquals:
+                  iam:AWSServiceName: schemas.amazonaws.com
+            - Sid: SecretsManagerAccessForApiDestinations
+              Effect: Allow
+              Action:
+                - secretsmanager:CreateSecret
+                - secretsmanager:UpdateSecret
+                - secretsmanager:DeleteSecret
+                - secretsmanager:GetSecretValue
+                - secretsmanager:PutSecretValue
+              Resource: arn:aws:secretsmanager:*:*:secret:events!*
+            - Sid: IAMPassRoleAccessForEventBridge
+              Effect: Allow
+              Action:
+                - iam:PassRole
+              Resource: arn:aws:iam::*:role/*
+              Condition:
+                StringLike:
+                  iam:PassedToService: events.amazonaws.com
+            - Sid: IAMPassRoleAccessForScheduler
+              Effect: Allow
+              Action:
+                - iam:PassRole
+              Resource: arn:aws:iam::*:role/*
+              Condition:
+                StringLike:
+                  iam:PassedToService: scheduler.amazonaws.com
+            - Sid: IAMPassRoleAccessForPipes
+              Effect: Allow
+              Action:
+                - iam:PassRole
+              Resource: arn:aws:iam::*:role/*
+              Condition:
+                StringLike:
+                  iam:PassedToService: pipes.amazonaws.com
+            - Effect: Allow
+              Action:
+                - sns:AddPermission
+                - sns:CreateTopic
+                - sns:SetTopicAttributes
+                - sns:GetTopicAttributes
+              Resource:
+                - arn:aws:sns:*:*:aws-cloudtrail-logs*
+            - Effect: Allow
+              Action:
+                - sns:ListTopics
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - s3:CreateBucket
+                - s3:PutBucketPolicy
+                - s3:PutBucketPublicAccessBlock
+              Resource:
+                - arn:aws:s3:::aws-cloudtrail-logs*
+            - Effect: Allow
+              Action:
+                - s3:ListAllMyBuckets
+                - s3:GetBucketLocation
+                - s3:GetBucketPolicy
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - cloudtrail:*
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+              Resource:
+                - arn:aws:logs:*:*:log-group:aws-cloudtrail-logs*
+            - Effect: Allow
+              Action:
+                - iam:ListRoles
+                - iam:GetRolePolicy
+                - iam:GetUser
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - iam:PassRole
+              Resource: '*'
+              Condition:
+                StringEquals:
+                  iam:PassedToService: cloudtrail.amazonaws.com
+            - Effect: Allow
+              Action:
+                - kms:CreateKey
+                - kms:CreateAlias
+                - kms:ListKeys
+                - kms:ListAliases
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - lambda:ListFunctions
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - dynamodb:ListGlobalTables
+                - dynamodb:ListTables
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - cloudformation:*
+              Resource: '*'
+      SnapStart:
+        ApplyOn: None
+      Events:
+        EventBridgeRule1:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.s3
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - s3.amazonaws.com
+                eventName:
+                  - PutBucketPolicy
+                  - PutBucketAcl
+                  - PutBucketVersioning
+                  - PutBucketEncryption
+                  - PutBucketTagging
+                  - PutBucketLogging
+        EventBridgeRule2:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.codepipeline
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - codepipeline.amazonaws.com
+                eventName:
+                  - UpdatePipeline
+        EventBridgeRule3:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.sqs
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - sqs.amazonaws.com
+                eventName:
+                  - SetQueueAttributes
+                  - TagQueue
+                  - UntagQueue
+        EventBridgeRule4:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.ssm
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - ssm.amazonaws.com
+                eventName:
+                  - DeleteParameter
+                  - PutParameter
+        EventBridgeRule5:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.sns
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - sns.amazonaws.com
+                eventName:
+                  - TagResource
+                  - SetTopicAttributes
+                  - RemovePermission
+        EventBridgeRule6:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.rds
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - rds.amazonaws.com
+                eventName:
+                  - ModifyDBInstance
+                  - DeleteDBInstance
+        EventBridgeRule7:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.ec2
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - ec2.amazonaws.com
+                eventName:
+                  - StopInstances
+                  - StartInstances
+                  - RebootInstances
+                  - TerminateInstances
+                  - ModifyInstanceAttribute
+        EventBridgeRule8:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.iam
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - iam.amazonaws.com
+                eventName:
+                  - DeleteRole
+                  - UpdateRole
+                  - AttachRolePolicy
+                  - DetachRolePolicy
+        EventBridgeRule9:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.dynamodb
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - dynamodb.amazonaws.com
+                eventName:
+                  - UpdateTable
+                  - DeleteTable
+                  - DeleteItem
+                  - UpdateItem
+        EventBridgeRule10:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.ec2
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - ec2.amazonaws.com
+                eventName:
+                  - AuthorizeSecurityGroupEgress
+                  - AuthorizeSecurityGroupIngress
+                  - RevokeSecurityGroupIngress
+                  - RevokeSecurityGroupEgress
+                  - UpdateSecurityGroupRuleDescriptionsEgress
+                  - UpdateSecurityGroupRuleDescriptionsIngress
+        EventBridgeRule11:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.ec2
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - ec2.amazonaws.com
+                eventName:
+                  - CreateVpc
+                  - DeleteVpc
+                  - ModifyVpcAttribute
+                  - CreateSubnet
+                  - DeleteSubnet
+                  - ModifySubnetAttribute
+                  - CreateInternetGateway
+                  - AttachInternetGateway
+                  - DetachInternetGateway
+                  - DeleteInternetGateway
+        EventBridgeRule12:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.ec2
+              detail-type:
+                - AWS API Call via CloudTrail
+              detail:
+                eventSource:
+                  - ec2.amazonaws.com
+                eventName:
+                  - CreateSnapshot
+                  - DeleteSnapshot
+                  - CreateTags
+                  - DeleteTags
+                  - DeleteVolume
+                  - AttachVolume
+                  - CreateVolume
+                  - DetachVolume
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: Auto
