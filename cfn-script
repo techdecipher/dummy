@@ -1,3 +1,6 @@
-{
-  "text": "This is a sample text with some **bold** words and some <span style='color:red;'>colored</span> words."
-}
+"Hi Team," 
+
+"Pipeline name: <pipeline> in region: <region> has failed at time <time>, its Current state is: <state>." 
+"Please check Pipeline for more details and to know its reason of failure."
+
+"Best Regards, DevOps Team"
