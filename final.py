@@ -1,17 +1,32 @@
 import boto3
-import json
-
-ec2 = boto3.client("ec2")
-
+ 
 def lambda_handler(event, context):
-    print("Received event:", json.dumps(event, indent=2))
+    ec2_client = boto3.client("ec2")
+ 
+    # Define the tag key to filter instances
+    tag_key = "Name"  # Change this to the tag you want to filter by
+ 
+    response = ec2_client.describe_instances(
+        Filters=[{"Name": f"tag:{tag_key}", "Values": ["Test-Server"]}]
 
-    instance_id = event["detail"]["instance-id"]
-    instance = ec2.describe_instances(InstanceIds=[instance_id])["Reservations"][0]["Instances"][0]
-
-    tags = {tag["Key"]: tag["Value"] for tag in instance.get("Tags", [])}
-    
-    if tags.get("Vendor") == "Databricks":
-        print(f"Databricks instance detected: {instance_id}")
-
-    return {"status": "success", "instance_id": instance_id}
+    )
+ 
+    instance_ids = []
+ 
+    for reservation in response["Reservations"]:
+        for instance in reservation["Instances"]:
+            instance_id = instance["InstanceId"]
+            instance_ids.append(instance_id)
+ 
+    print(f"Instances with tag '{tag_key}': {instance_ids}")
+    if instance_ids:
+        # Add the new tag "NoBackup = true" to the identified instances
+        ec2_client.create_tags(
+            Resources=instance_ids,
+            Tags=[{"Key": "NoBackup", "Value": "true"}]
+        )
+        print(f"Tagged instances: {instance_ids} with NoBackup=true")
+    else:
+        print(f"No instances found with tag '{tag_key}'.")
+ 
+    return {"statusCode": 200, "body": {"TaggedInstances": instance_ids}}
