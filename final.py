@@ -1,31 +1,45 @@
-import boto3
 import json
+import boto3
 
-ec2_client = boto3.client("ec2")
+ses = boto3.client('ses')
+
+SENDER = "your-email@example.com"  # Replace with your verified SES email
+RECIPIENTS = [
+    "recipient1@example.com",
+    "recipient2@example.com",
+    "recipient3@example.com"
+]  # Add more as needed
+
+SUBJECT = "CodePipeline Failure Alert"
 
 def lambda_handler(event, context):
-    print("Received event:", json.dumps(event, indent=2))
+    print("Received Event:", json.dumps(event, indent=4))  # Debugging: Print event details
 
-    instance_id = event["detail"]["instance-id"]
+    try:
+        pipeline_name = event['detail']['pipeline']
+        region = event['region']
+        failure_time = event['time']
+        state = event['detail']['state']
 
-    # Fetch instance details
-    response = ec2_client.describe_instances(InstanceIds=[instance_id])
-    instance = response["Reservations"][0]["Instances"][0]
-
-    # Extract tags
-    tags = {tag["Key"]: tag["Value"] for tag in instance.get("Tags", [])}
-
-    # Check if instance has Vendor=Databricks
-    if tags.get("Vendor") == "Databricks":
-        print(f"Databricks instance detected: {instance_id}")
-
-        # Add the new tag "NoBackup=true"
-        ec2_client.create_tags(
-            Resources=[instance_id],
-            Tags=[{"Key": "NoBackup", "Value": "true"}]
+        message_body = (
+            f"Hi Team,\n\n"
+            f"Pipeline Name: {pipeline_name} in Region: {region} has failed at {failure_time}.\n"
+            f"Its current state is: {state}.\n\n"
+            f"Please check the pipeline for more details and to know the reason for failure.\n\n"
+            f"Best Regards,\n"
+            f"DevOps Team"
         )
-        print(f"Tagged instance {instance_id} with NoBackup=true")
-    else:
-        print(f"Instance {instance_id} does not have Vendor=Databricks, skipping.")
 
-    return {"status": "success", "instance_id": instance_id}
+        response = ses.send_email(
+            Source=SENDER,
+            Destination={'ToAddresses': RECIPIENTS},
+            Message={
+                'Subject': {'Data': SUBJECT},
+                'Body': {'Text': {'Data': message_body}}
+            }
+        )
+
+        print("Email sent! Message ID:", response['MessageId'])
+    except Exception as e:
+        print("Error sending email:", str(e))
+    return {"statusCode": 200, "body": json.dumps("Lambda executed successfully")}
