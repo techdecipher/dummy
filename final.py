@@ -1,45 +1,50 @@
 import json
 import boto3
+from datetime import datetime
 
-ses = boto3.client('ses')
-
-SENDER = "your-email@example.com"  # Replace with your verified SES email
-RECIPIENTS = [
-    "recipient1@example.com",
-    "recipient2@example.com",
-    "recipient3@example.com"
-]  # Add more as needed
-
-SUBJECT = "CodePipeline Failure Alert"
+ses_client = boto3.client('ses')
 
 def lambda_handler(event, context):
-    print("Received Event:", json.dumps(event, indent=4))  # Debugging: Print event details
+    print("Received event:", json.dumps(event, indent=2))
+    pipeline_name = event['detail']['pipeline']
+    state = event['detail']['state']
+    execution_id = event['detail']['execution-id']
+    region = event['region']
+    account_id = event['account']
+    time = event['time']
+    
+    dt = datetime.strptime(time, "%Y-%m-%dT%H:%M:%S%z")
+    Failure_time = dt.strftime("%Y-%m-%d %H:%M:%S")
 
-    try:
-        pipeline_name = event['detail']['pipeline']
-        region = event['region']
-        failure_time = event['time']
-        state = event['detail']['state']
+    subject = f'CodePipeline Failure Notification: {pipeline_name}'
+    body = f"""
+    Hello Team,
 
-        message_body = (
-            f"Hi Team,\n\n"
-            f"Pipeline Name: {pipeline_name} in Region: {region} has failed at {failure_time}.\n"
-            f"Its current state is: {state}.\n\n"
-            f"Please check the pipeline for more details and to know the reason for failure.\n\n"
-            f"Best Regards,\n"
-            f"DevOps Team"
-        )
+    This is to notify you that the below CI-CD Pipeline has failed.
 
-        response = ses.send_email(
-            Source=SENDER,
-            Destination={'ToAddresses': RECIPIENTS},
-            Message={
-                'Subject': {'Data': SUBJECT},
-                'Body': {'Text': {'Data': message_body}}
-            }
-        )
+    Details:
+    - Pipeline Name: {pipeline_name}
+    - State: {state}
+    - Execution ID: {execution_id}
+    - Region: {region}
+    - Time: {Failure_time}
 
-        print("Email sent! Message ID:", response['MessageId'])
-    except Exception as e:
-        print("Error sending email:", str(e))
-    return {"statusCode": 200, "body": json.dumps("Lambda executed successfully")}
+    Please take the necessary actions to investigate and resolve the issue.
+
+    Best regards,
+    Your DevOps Team
+    """
+
+    response = ses_client.send_email(
+        Source='pranav.chaudhari@ge.com', 
+        Destination={
+            'ToAddresses': ['user1@gem.com',
+            'user2@gem.com',
+            'user3@gem.com']
+        },
+        Message={
+            'Subject': {'Data': subject},
+            'Body': {'Text': {'Data': body}}
+        }
+    )
+    return response
