@@ -30,32 +30,30 @@ def lambda_handler(event, context):
     pipeline_details = response['pipeline']
     name = pipeline_details['name']
     stages = pipeline_details['stages']
-        
+    
     # Log the details
     print('Stages:')
+    
     # Extract and print stage details
-    #stage_states = execution_details.get('pipelineExecution', {}).get('stage_states', [])
-    #stages = execution_details['pipelineExecution']['stages']
-    #print(stages)
-
     stages = execution_details['pipelineExecution']['stages']
-        for stage in stages:
-            if stage['name'] == 'Airflow-Source':
-                for action in stage['actions']:
-                    if 'output' in action:
-                        output_variables = action['output']['outputVariables']
-                        
-                        # Extract and print the desired attributes
-                        author_date = output_variables.get('AuthorDate', 'Unknown')
-                        author_display_name = output_variables.get('AuthorDisplayName', 'Unknown')
-                        author_email = output_variables.get('AuthorEmail', 'Unknown')
-                        author_id = output_variables.get('AuthorId', 'Unknown')
-                        branch_name = output_variables.get('BranchName', 'Unknown')
-                        commit_id = output_variables.get('CommitId', 'Unknown')
-                        commit_message = output_variables.get('CommitMessage', 'Unknown')
-                        connection_arn = output_variables.get('ConnectionArn', 'Unknown')
-                        full_repository_name = output_variables.get('FullRepositoryName', 'Unknown')
-                        provider_type = output_variables.get('ProviderType', 'Unknown')
+    for stage in stages:
+        if stage['name'] == 'Airflow-Source':
+            for action in stage['actions']:
+                if 'output' in action:
+                    output_variables = action['output']['outputVariables']
+                    
+                    # Extract and print the desired attributes
+                    author_date = output_variables.get('AuthorDate', 'Unknown')
+                    author_display_name = output_variables.get('AuthorDisplayName', 'Unknown')
+                    author_email = output_variables.get('AuthorEmail', 'Unknown')
+                    author_id = output_variables.get('AuthorId', 'Unknown')
+                    branch_name = output_variables.get('BranchName', 'Unknown')
+                    commit_id = output_variables.get('CommitId', 'Unknown')
+                    commit_message = output_variables.get('CommitMessage', 'Unknown')
+                    connection_arn = output_variables.get('ConnectionArn', 'Unknown')
+                    full_repository_name = output_variables.get('FullRepositoryName', 'Unknown')
+                    provider_type = output_variables.get('ProviderType', 'Unknown')
+    
     return {
         'statusCode': 200,
         'body': json.dumps('Pipeline execution details captured successfully!')
