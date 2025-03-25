@@ -1,1 +1,8 @@
-tesst
+The resource sampipelinefailurenotificationEventInvokeConfig is in a DELETE_FAILED state
+This AWS::Lambda::EventInvokeConfig resource is in a DELETE_FAILED state.
+
+Resource handler returned message: "User: arn:aws:sts::aws_acc:assumed-role/some_role/AWSCloudFormation is not authorized to perform: lambda:DeleteFunctionEventInvokeConfig on resource: arn:aws:lambda:us-east-1:some_acc:function:sam-CI-CD-Pipeline-Failure-Notification:$LATEST with an explicit deny in an identity-based policy (Service: Lambda, Status Code: 403, Request ID: 8becf7f9-ddd7-487f-b21b-c7f328caf3fd)" (RequestToken: d17c2f9f-b5dd-3e00-8f11-0dfef8a8d537, HandlerErrorCode: AccessDenied)
+
+
+Failure reason
+Resource handler returned message: "Function not found: arn:aws:lambda:us-east-1:some_acc:function:sam-CI-CD-Pipeline-Failure-Notification (Service: Lambda, Status Code: 404, Request ID: 0dc934eb-a011-412b-a3fc-b31b734be2ae) (SDK Attempt Count: 1)" (RequestToken: 3ebdff6c-5a3d-6012-122e-cdc1b214eb9b, HandlerErrorCode: NotFound)
