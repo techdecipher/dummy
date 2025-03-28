@@ -6,13 +6,28 @@ ec2 = boto3.client('ec2')
 s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
-    az = 'us-east-1a'  # Replace with your target AZ
+    az = 'us-east-1a'
     region = 'us-east-1'
-    bucket = 'your-s3-bucket-name'  # Replace with your S3 bucket
-    instance_types = ['t3.micro', 't3.small', 't3.medium']  # Add more as needed
+    bucket = 'your-s3-bucket-name'
+
+    # Step 1: Get all running instances in this AZ
+    response = ec2.describe_instances(
+        Filters=[
+            {'Name': 'availability-zone', 'Values': [az]},
+            {'Name': 'instance-state-name', 'Values': ['running']}
+        ]
+    )
+
+    # Step 2: Extract unique instance types
+    instance_types_set = set()
+    for reservation in response['Reservations']:
+        for instance in reservation['Instances']:
+            instance_types_set.add(instance['InstanceType'])
+
     results = []
 
-    for itype in instance_types:
+    # Step 3: Check availability for each instance type
+    for itype in instance_types_set:
         try:
             ec2.create_capacity_reservation(
                 InstanceType=itype,
@@ -32,6 +47,7 @@ def lambda_handler(event, context):
             else:
                 results.append({'instance_type': itype, 'status': f'Error: {msg}'})
 
+    # Step 4: Store results to S3
     output = {
         'availability_zone': az,
         'timestamp': str(datetime.datetime.utcnow()),
