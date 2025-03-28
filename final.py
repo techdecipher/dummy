@@ -1,60 +1,71 @@
-import boto3
-import json
+Here's a sample AWS Lambda function written in Python that checks the EC2 instance capacity running on a specific Availability Zone (AZ:
 
-codepipeline = boto3.client('codepipeline')
-s3 = boto3.client('s3')
+```
+import boto3
 
 def lambda_handler(event, context):
-    # Extract pipeline details from the event
-    pipeline_name = event['detail']['pipeline']
-    execution_id = event['detail']['execution-id']
-    
-    # Get pipeline execution details
-    execution_details = codepipeline.get_pipeline_execution(
-        pipelineName=pipeline_name,
-        pipelineExecutionId=execution_id
-    )
-    
-    # Print basic information
-    print(f'Pipeline Name: {pipeline_name}')
-    print(f'Execution ID: {execution_id}')
-    
-    print(f'Execution Details: {json.dumps(execution_details, indent=2)}')
-    summary = execution_details.get('pipelineExecution', {})
-    print(summary)
+    # Initialize EC2 client
+    ec2 = boto3.client('ec2')
 
-    # Get the pipeline details
-    response = codepipeline.get_pipeline(name=pipeline_name)
-    print(response)    
-    # Extract the required details
-    pipeline_details = response['pipeline']
-    name = pipeline_details['name']
-    stages = pipeline_details['stages']
-    
-    # Log the details
-    print('Stages:')
-    
-    # Extract and print stage details
-    stages = execution_details['pipelineExecution']['stages']
-    for stage in stages:
-        if stage['name'] == 'Airflow-Source':
-            for action in stage['actions']:
-                if 'output' in action:
-                    output_variables = action['output']['outputVariables']
-                    
-                    # Extract and print the desired attributes
-                    author_date = output_variables.get('AuthorDate', 'Unknown')
-                    author_display_name = output_variables.get('AuthorDisplayName', 'Unknown')
-                    author_email = output_variables.get('AuthorEmail', 'Unknown')
-                    author_id = output_variables.get('AuthorId', 'Unknown')
-                    branch_name = output_variables.get('BranchName', 'Unknown')
-                    commit_id = output_variables.get('CommitId', 'Unknown')
-                    commit_message = output_variables.get('CommitMessage', 'Unknown')
-                    connection_arn = output_variables.get('ConnectionArn', 'Unknown')
-                    full_repository_name = output_variables.get('FullRepositoryName', 'Unknown')
-                    provider_type = output_variables.get('ProviderType', 'Unknown')
-    
+    # Define the Availability Zone (AZ) to check
+    az = 'us-west-2a'  # Replace with your desired AZ
+
+    # Get the EC2 instance capacity for the specified AZ
+    response = ec2.describe_instance_type_offerings(
+        LocationType='availability-zone',
+        Filters=[
+            {'Name': 'location', 'Values': [az]}
+        ]
+    )
+
+    # Extract the instance type offerings for the AZ
+    instance_type_offerings = response['InstanceTypeOfferings']
+
+    # Initialize a dictionary to store the instance type capacities
+    instance_type_capacities = {}
+
+    # Iterate through the instance type offerings
+    for offering in instance_type_offerings:
+        instance_type = offering['InstanceType']
+        response = ec2.describe_instance_type_offering(
+            InstanceType=instance_type,
+            LocationType='availability-zone',
+            Filters=[
+                {'Name': 'location', 'Values': [az]}
+            ]
+        )
+        instance_type_capacities[instance_type] = response['InstanceTypeOfferingSet'][0]['OfferingClass']
+
+    # Print the instance type capacities for the AZ
+    print(f'Instance type capacities for AZ {az}:')
+    for instance_type, capacity in instance_type_capacities.items():
+        print(f'{instance_type}: {capacity}')
+
     return {
         'statusCode': 200,
-        'body': json.dumps('Pipeline execution details captured successfully!')
+        'body': instance_type_capacities
     }
+```
+
+This Lambda function:
+
+1. Initializes an EC2 client using the `boto3` library.
+2. Defines the Availability Zone (AZ) to check.
+3. Uses the `describe_instance_type_offerings` method to get the EC2 instance type offerings for the specified AZ.
+4. Extracts the instance type offerings for the AZ.
+5. Initializes a dictionary to store the instance type capacities.
+6. Iterates through the instance type offerings and uses the `describe_instance_type_offering` method to get the instance type capacity for each offering.
+7. Stores the instance type capacities in the dictionary.
+8. Prints the instance type capacities for the AZ.
+9. Returns the instance type capacities as a JSON response.
+
+To deploy this Lambda function:
+
+1. Create a new Lambda function in the AWS Management Console.
+2. Choose Python as the runtime.
+3. Upload the code as a ZIP file or copy-paste it into the inline editor.
+4. Set the handler to `index.lambda_handler`.
+5. Configure the environment variables and IAM role as needed.
+6. Test the function using the AWS Lambda console or AWS CLI.
+
+Note: This code assumes you have the necessary IAM permissions to access EC2 resources. Make sure to update the AZ variable to match your desired Availability Zone.
