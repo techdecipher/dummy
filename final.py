@@ -6,28 +6,24 @@ ec2 = boto3.client('ec2')
 s3 = boto3.client('s3')
 
 def lambda_handler(event, context):
-    az = 'us-east-1a'
-    region = 'us-east-1'
-    bucket = 'your-s3-bucket-name'
+    az = 'us-east-1a'                            # Target Availability Zone
+    region = 'us-east-1'                         # Region
+    bucket = 'your-s3-bucket-name'               # Replace with your S3 bucket name
 
-    # Step 1: Get all running instances in this AZ
-    response = ec2.describe_instances(
+    # Step 1: Get all instance types offered in the AZ
+    offerings = ec2.describe_instance_type_offerings(
+        LocationType='availability-zone',
         Filters=[
-            {'Name': 'availability-zone', 'Values': [az]},
-            {'Name': 'instance-state-name', 'Values': ['running']}
+            {'Name': 'location', 'Values': [az]}
         ]
     )
 
-    # Step 2: Extract unique instance types
-    instance_types_set = set()
-    for reservation in response['Reservations']:
-        for instance in reservation['Instances']:
-            instance_types_set.add(instance['InstanceType'])
+    instance_types = [item['InstanceType'] for item in offerings['InstanceTypeOfferings']]
 
     results = []
 
-    # Step 3: Check availability for each instance type
-    for itype in instance_types_set:
+    # Step 2: Check capacity availability via DryRun for each type
+    for itype in instance_types:
         try:
             ec2.create_capacity_reservation(
                 InstanceType=itype,
@@ -47,7 +43,7 @@ def lambda_handler(event, context):
             else:
                 results.append({'instance_type': itype, 'status': f'Error: {msg}'})
 
-    # Step 4: Store results to S3
+    # Step 3: Save results to S3
     output = {
         'availability_zone': az,
         'timestamp': str(datetime.datetime.utcnow()),
@@ -62,5 +58,5 @@ def lambda_handler(event, context):
 
     return {
         'statusCode': 200,
-        'body': 'EC2 capacity check stored in S3.'
+        'body': 'Capacity check result saved to S3.'
     }
