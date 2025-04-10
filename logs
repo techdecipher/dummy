@@ -1,41 +1,7 @@
-[oracle@innovappoas2 oas_bi_full]$ ./bi_platform-*.bin -mode=console
-Launcher log file is /tmp/OraInstall2025-04-10_06-52-59PM/launcher2025-04-10_06-52-59PM.log.
-Extracting the installer . . . . . . . Done
-Checking if CPU speed is above 300 MHz.   Actual 2899.950 MHz    Passed
-Checking swap space: must be greater than 512 MB.   Actual 0 MB    Failed <<<<
-
-Some system prerequisite checks failed.
-You must fulfill these requirements before continuing.
-
-Continue? (yes [y] / no [n]) [n]
-y
-You have confirmed that the product can be installed on this platform.
-Continuing with the installation.
-
-
-Preparing to launch the Oracle Universal Installer from /tmp/OraInstall2025-04-10_06-52-59PM
-DISPLAY is not set.  Please set the DISPLAY environment variable and try again.
-Depending on the Unix Shell, you can use one of the following commands as examples to set the DISPLAY environment variable:
-- For csh:                      %% setenv DISPLAY 192.168.1.128:0.0
-- For sh, ksh and bash:         $ DISPLAY=192.168.1.128:0.0; export DISPLAY
-Use the following command to see what shell is being used:
-echo $SHELL
-Use the following command to view the current DISPLAY environment variable setting:
-echo $DISPLAY
-- Make sure that client users are authorized to connect to the X Server.
-To enable client users to access the X Server, open an xterm, dtterm or xconsole as the user that started the session and type the following command:
-%% xhost +
-To test that the DISPLAY environment variable is set correctly, run a X11 based program that comes with the native operating system such as 'xclock':
-%% <full path to xclock; see below>
-If you are not able to run xclock successfully, please refer to your PC-X Server or OS vendor for further assistance.
-Typical path for xclock: /usr/X11R6/bin/xclock
-Log: /tmp/OraInstall2025-04-10_06-52-59PM/install2025-04-10_06-52-59PM.log
-
-No X11 DISPLAY variable was set.
-Set this variable to a valid value, for example:
-
-set DISPLAY=localhost:0.0
-
-The log(s) can be found here: /tmp/OraInstall2025-04-10_06-52-59PM.
-ERROR: Installer execution failed (1).
-[oracle@innovappoas1 oas_bi_full]$
+[ENGINE]
+Response File Version=1.0.0.0.0
+[GENERIC]
+ORACLE_HOME=/u01/app/oracle/middleware
+INSTALL_TYPE=Enterprise Install
+DECLINE_SECURITY_UPDATES=true
+SECURITY_UPDATES_VIA_MYORACLESUPPORT=false
