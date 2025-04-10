@@ -1,5 +1,1 @@
-cd /tmp
-
-# Download the required Oracle Linux 7 packages manually:
-curl -O https://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/getPackage/compat-libcap1-1.10-7.el7.x86_64.rpm
-curl -O https://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/getPackage/compat-libstdc++-33-3.2.3-72.el7.x86_64.rpm
+sudo rpm -ivh compat-libcap1-1.10-7.el7.x86_64.rpm compat-libstdc++-33-3.2.3-72.el7.x86_64.rpm
