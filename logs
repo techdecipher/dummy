@@ -1,7 +1,5 @@
-[gecloud@innovappoas1 software]$ sudo dnf install -y compat-libcap1 compat-libstdc++-33
-Oracle Linux 8 Development Packages (x86_64)                                                          113 MB/s | 196 MB     00:01
-Last metadata expiration check: 0:00:40 ago on Thu 10 Apr 2025 07:15:48 PM GMT.
-No match for argument: compat-libcap1
-No match for argument: compat-libstdc++-33
-Error: Unable to find a match: compat-libcap1 compat-libstdc++-33
-[gecloud@innovappoas1 software]$
+cd /tmp
+
+# Download the required Oracle Linux 7 packages manually:
+curl -O https://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/getPackage/compat-libcap1-1.10-7.el7.x86_64.rpm
+curl -O https://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/getPackage/compat-libstdc++-33-3.2.3-72.el7.x86_64.rpm
