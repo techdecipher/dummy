@@ -1,10 +1,10 @@
 [oracle@innovappoas1 oas_bi_full]$ ./bi_platform-*.bin -silent -responseFile /u01/software/oas_bi_full/bi_silent.rsp -invPtrLoc /etc/oraInst.loc
-Launcher log file is /tmp/OraInstall2025-04-10_07-45-38PM/launcher2025-04-10_07-45-38PM.log.
+Launcher log file is /tmp/OraInstall2025-04-10_07-50-00PM/launcher2025-04-10_07-50-00PM.log.
 Extracting the installer . . . . . . . Done
-Checking if CPU speed is above 300 MHz.   Actual 3503.953 MHz    Passed
+Checking if CPU speed is above 300 MHz.   Actual 2899.950 MHz    Passed
 Checking swap space: must be greater than 512 MB.   Actual 1023 MB    Passed
-Preparing to launch the Oracle Universal Installer from /tmp/OraInstall2025-04-10_07-45-38PM
-Log: /tmp/OraInstall2025-04-10_07-45-38PM/install2025-04-10_07-45-38PM.log
+Preparing to launch the Oracle Universal Installer from /tmp/OraInstall2025-04-10_07-50-00PM
+Log: /tmp/OraInstall2025-04-10_07-50-00PM/install2025-04-10_07-50-00PM.log
 Copyright (c) 1999, 2017, Oracle and/or its affiliates. All rights reserved.
 Reading response file..
 Skipping Software Updates
@@ -65,15 +65,14 @@ CheckJDKVersion Check: Success.
 Validations are enabled for this session.
 Verifying data
 [VALIDATION] [ERROR]:INST-07551: Not all dependent featuresets for install type "BI Platform Distribution" could be found. The following prerequisites were found to be missing:
-jrf_wlsFmw - 12.2.1.3.0
+jrf_wlsFmw - 12.2.1.3.0glcm_opatchauto_fmw - 13.9.2.0.0jre - 12.2.1.3.0
 [VALIDATION] [SUGGESTION]:Select a different Oracle Home having all dependencies. Check http://www.oracle.com/pls/topic/lookup?ctx=fmw122130&id=installhome for details about compatible products and install types.
 [VALIDATION] [ERROR]:INST-07551: Not all dependent featuresets for install type "BI Platform Distribution with Samples" could be found. The following prerequisites were found to be missing:
-jrf_wlsFmw - 12.2.1.3.0
+jrf_wlsFmw - 12.2.1.3.0glcm_opatchauto_fmw - 13.9.2.0.0jre - 12.2.1.3.0
 [VALIDATION] [SUGGESTION]:Select a different Oracle Home having all dependencies. Check http://www.oracle.com/pls/topic/lookup?ctx=fmw122130&id=installhome for details about compatible products and install types.
 [VALIDATION] [ERROR]:INST-07548: The selected distribution does not have any compatible install type for the selected Oracle Home.
 [VALIDATION] [SUGGESTION]:Provide a different oracle Home. Check http://www.oracle.com/pls/topic/lookup?ctx=fmw122130&id=installhome for details about compatible products and install types.
 installation Failed. Exiting installation due to data validation failure.
 
-The log(s) can be found here: /tmp/OraInstall2025-04-10_07-45-38PM.
+The log(s) can be found here: /tmp/OraInstall2025-04-10_07-50-00PM.
 ERROR: Installer execution failed (1).
-[oracle@innovappoas1 oas_bi_full]$
