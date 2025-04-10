@@ -1,7 +1,11 @@
-[ENGINE]
-Response File Version=1.0.0.0.0
-[GENERIC]
-ORACLE_HOME=/u01/app/oracle/middleware
-INSTALL_TYPE=Enterprise Install
-DECLINE_SECURITY_UPDATES=true
-SECURITY_UPDATES_VIA_MYORACLESUPPORT=false
+[oracle@innovappoas1 oas_bi_full]$ ./bi_platform-*.bin -silent -responseFile /u01/software/oas_bi_full/bi_silent.rsp -invPtrLoc /etc/oraInst.loc
+Launcher log file is /tmp/OraInstall2025-04-10_07-01-00PM/launcher2025-04-10_07-01-00PM.log.
+Extracting the installer . . . . . . . . Done
+Checking if CPU speed is above 300 MHz.   Actual 2899.950 MHz    Passed
+Checking swap space: must be greater than 512 MB.   Actual 0 MB    Failed <<<<
+
+Some system prerequisite checks failed.
+You must fulfill these requirements before continuing.
+The log is located here: /tmp/OraInstall2025-04-10_07-01-00PM/launcher2025-04-10_07-01-00PM.log.
+ERROR: Installer execution failed (1).
+[oracle@innovappoas1 oas_bi_full]$
