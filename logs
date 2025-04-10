@@ -1,11 +1,72 @@
 [oracle@innovappoas1 oas_bi_full]$ ./bi_platform-*.bin -silent -responseFile /u01/software/oas_bi_full/bi_silent.rsp -invPtrLoc /etc/oraInst.loc
-Launcher log file is /tmp/OraInstall2025-04-10_07-01-00PM/launcher2025-04-10_07-01-00PM.log.
-Extracting the installer . . . . . . . . Done
-Checking if CPU speed is above 300 MHz.   Actual 2899.950 MHz    Passed
-Checking swap space: must be greater than 512 MB.   Actual 0 MB    Failed <<<<
+Launcher log file is /tmp/OraInstall2025-04-10_07-09-38PM/launcher2025-04-10_07-09-38PM.log.
+Extracting the installer . . . . . . . Done
+Checking if CPU speed is above 300 MHz.   Actual 3500.126 MHz    Passed
+Checking swap space: must be greater than 512 MB.   Actual 1023 MB    Passed
+Preparing to launch the Oracle Universal Installer from /tmp/OraInstall2025-04-10_07-09-38PM
+Log: /tmp/OraInstall2025-04-10_07-09-38PM/install2025-04-10_07-09-38PM.log
+Copyright (c) 1999, 2017, Oracle and/or its affiliates. All rights reserved.
+Reading response file..
+Skipping Software Updates
+Starting check : CertifiedVersions
+Expected result: One of redhat-7, redhat-6, oracle-6, oracle-7, SuSE-11, SuSE-12
+Actual Result: oracle-8.10
+Check complete. The overall result of this check is: Passed
+CertifiedVersions Check: Success.
 
-Some system prerequisite checks failed.
-You must fulfill these requirements before continuing.
-The log is located here: /tmp/OraInstall2025-04-10_07-01-00PM/launcher2025-04-10_07-01-00PM.log.
+
+Starting check : Packages
+Checking for binutils-2.23.52.0.1; found binutils-2.30-125.0.1.el8_10-x86_64.   Passed
+Checking for compat-libcap1-1.10; Not found.    Failed
+Checking for compat-libstdc++-33-3.2.3-x86_64; Not found.       Failed
+Checking for libgcc-4.8.2-x86_64; found libgcc-8.5.0-26.0.1.el8_10-x86_64.      Passed
+Checking for libstdc++-4.8.2-x86_64; found libstdc++-8.5.0-26.0.1.el8_10-x86_64.        Passed
+Checking for libstdc++-devel-4.8.2-x86_64; found libstdc++-devel-8.5.0-26.0.1.el8_10-x86_64.    Passed
+Checking for sysstat-10.1.5; found sysstat-11.7.3-13.0.2.el8_10-x86_64. Passed
+Checking for gcc-4.8.2; found gcc-8.5.0-26.0.1.el8_10-x86_64.   Passed
+Checking for gcc-c++-4.8.2; found gcc-c++-8.5.0-26.0.1.el8_10-x86_64.   Passed
+Checking for make-3.82; found make-1:4.2.1-11.el8-x86_64.       Passed
+Checking for glibc-2.17-x86_64; found glibc-2.28-251.0.3.el8_10.14-x86_64.      Passed
+Checking for glibc-devel-2.17-x86_64; found glibc-devel-2.28-251.0.3.el8_10.14-x86_64.  Passed
+Checking for libaio-0.3.109-x86_64; found libaio-0.3.112-1.el8-x86_64.  Passed
+Check complete. The overall result of this check is: Failed
+
+Problem: Some recommended packages are missing (see above).
+Recommendation: You may actually have installed packages which have obsoleted these, in which case you can successfully continue with the install. If you have not, it is recommended that you do not continue. Refer to the product release notes to find out how to get the missing packages and update the system.
+Error: Check:Packages failed.
+
+
+Starting check : Kernel
+Checking for VERSION=3.8.0; found VERSION=5.15.0-306.177.4.1.el8uek.x86_64.     Passed
+Checking for hardnofiles=4096; found hardnofiles=65536. Passed
+Checking for softnofiles=4096; found softnofiles=65536. Passed
+Check complete. The overall result of this check is: Passed
+Kernel Check: Success.
+
+
+Starting check : GLIBC
+Expected result: ATLEAST=2.17
+Actual Result: 2.28-251.0.3.el8_10.14
+Check complete. The overall result of this check is: Passed
+GLIBC Check: Success.
+
+
+Starting check : TotalMemory
+Expected result: 1024MB
+Actual Result: 62988MB
+Check complete. The overall result of this check is: Passed
+TotalMemory Check: Success.
+
+
+Starting check : CheckJDKVersion
+Expected result: 1.8.0_131
+Actual Result: 1.8.0_131
+Check complete. The overall result of this check is: Passed
+CheckJDKVersion Check: Success.
+
+
+Prereq failed. Aborting Install
+
+The log(s) can be found here: /tmp/OraInstall2025-04-10_07-09-38PM.
 ERROR: Installer execution failed (1).
 [oracle@innovappoas1 oas_bi_full]$
