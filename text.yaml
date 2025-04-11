@@ -1,14 +1,14 @@
-Install components BIPLATFORM (Non-SSL mode)
-	
-Note: BIPLATFORM component will install only using 1521 port. It does not support TCPS port 2484.
-
-cd $ORACLE_HOME/oracle_common/bin
-
-unset RCU_SSL_MODE
-
-./rcu -silent -createRepository -connectString devdboas1:1521:oasdev -dbUser sys -dbRole sysdba -schemaPrefix oas -component BIPLATFORM
-
-
-Enter the database password(User:sys):
-
-Enter the schema password for [OAS_BIPLATFORM]:
+- name: Run RCU for BIPLATFORM component (non-SSL)
+  expect:
+    command: >
+      ./rcu -silent -createRepository
+      -connectString {{ db_host }}:1521:{{ db_service }}
+      -dbUser sys
+      -dbRole sysdba
+      -schemaPrefix {{ schema_prefix }}
+      -component BIPLATFORM
+    responses:
+      '.*database password.*': "{{ db_sys_password }}"
+      '.*schema password for \[OAS_BIPLATFORM\].*': "{{ biplatform_password }}"
+  args:
+    chdir: "{{ fmw_home }}/oracle_common/bin"
