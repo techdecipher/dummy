@@ -1,10 +1,20 @@
-verification for components
+- name: Verify if RCU schemas are created (OAS_%)
+  shell: |
+    export ORACLE_HOME=/u01/app/oracle/product/client19c
+    export TNS_ADMIN=/u01/app/oracle/product/client19c/network/admin
+    export PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch:$PATH
+    sqlplus -s system/{{ db_system_password }}@oasdev <<EOF
+    SET HEADING ON
+    SET FEEDBACK ON
+    SET PAGESIZE 50
+    SET LINESIZE 100
+    select username, account_status from dba_users where username like 'OAS_%';
+    exit;
+    EOF
+  register: rcu_schema_output
+  become: yes
+  become_user: oracle
 
-path:  /u01/app/oracle/product/fmw122140/oracle_common/bin
-
-export ORACLE_HOME=/u01/app/oracle/product/client19c
-export TNS_ADMIN=/u01/app/oracle/product/client19c/network/admin
-export PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch:$PATH
-sqlplus system/innovmantar123#@oasdev
-
-select username,account_status from dba_users where username like 'OAS_%';
+- name: Display RCU schema output
+  debug:
+    msg: "{{ rcu_schema_output.stdout }}"
