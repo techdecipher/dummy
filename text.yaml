@@ -1,14 +1,10 @@
-- name: Run RCU for BIPLATFORM component (non-SSL)
-  expect:
-    command: >
-      ./rcu -silent -createRepository
-      -connectString {{ db_host }}:1521:{{ db_service }}
-      -dbUser sys
-      -dbRole sysdba
-      -schemaPrefix {{ schema_prefix }}
-      -component BIPLATFORM
-    responses:
-      '.*database password.*': "{{ db_sys_password }}"
-      '.*schema password for \[OAS_BIPLATFORM\].*': "{{ biplatform_password }}"
-  args:
-    chdir: "{{ fmw_home }}/oracle_common/bin"
+verification for components
+
+path:  /u01/app/oracle/product/fmw122140/oracle_common/bin
+
+export ORACLE_HOME=/u01/app/oracle/product/client19c
+export TNS_ADMIN=/u01/app/oracle/product/client19c/network/admin
+export PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch:$PATH
+sqlplus system/innovmantar123#@oasdev
+
+select username,account_status from dba_users where username like 'OAS_%';
