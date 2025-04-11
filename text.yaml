@@ -1,21 +1,29 @@
-cd $ORACLE_HOME/oracle_common/bin
-
-export RCU_SSL_MODE=true
-
-./rcu -silent -createRepository -connectString devdboas1:2484:oasdev -dbUser sys -dbRole sysdba -useSSL -sslArgs javax.net.ssl.trustStore=/u01/app/oracle/wallet/ewallet.p12,javax.net.ssl.trustStoreType=PKCS12, javax.net.ssl.keyStore=/u01/app/oracle/wallet/ewallet.p12, javax.net.ssl.keyStoreType=PKCS12,oracle.net.ssl_server_dn_match=true, oracle.net.authentication_services=TCPS -sslPasswordArgNames javax.net.ssl.keyStorePassword,javax.net.ssl.trustStorePassword -schemaPrefix oas -component OPSS -component IAU -component IAU_APPEND -component IAU_VIEWER -serverDN CN=devdboas1
-
-
-
-Enter the password for SSL property: javax.net.ssl.keyStorePassword
-
-Enter the password for SSL property: javax.net.ssl.trustStorePassword
-
-Enter the database password(User:sys):
-
-Enter the schema password for [OAS_OPSS]:
-
-Enter the schema password for [OAS_IAU]:
-
-Enter the schema password for [OAS_IAU_APPEND]:
-
-Enter the schema password for [OAS_IAU_VIEWER]:
+- name: Run RCU for OPSS, IAU, IAU_APPEND, IAU_VIEWER components
+  expect:
+    command: >
+      ./rcu -silent -createRepository
+      -connectString {{ db_host }}:{{ db_port_ssl }}:{{ db_service }}
+      -dbUser sys
+      -dbRole sysdba
+      -useSSL
+      -sslArgs
+      javax.net.ssl.trustStore={{ wallet_dir }}/ewallet.p12,
+      javax.net.ssl.trustStoreType=PKCS12,
+      javax.net.ssl.keyStore={{ wallet_dir }}/ewallet.p12,
+      javax.net.ssl.keyStoreType=PKCS12,
+      oracle.net.ssl_server_dn_match=true,
+      oracle.net.authentication_services=TCPS
+      -sslPasswordArgNames javax.net.ssl.keyStorePassword,javax.net.ssl.trustStorePassword
+      -schemaPrefix {{ schema_prefix }}
+      -component OPSS -component IAU -component IAU_APPEND -component IAU_VIEWER
+      -serverDN CN={{ db_host }}
+    responses:
+      '.*javax.net.ssl.keyStorePassword.*': "{{ keystore_password }}"
+      '.*javax.net.ssl.trustStorePassword.*': "{{ truststore_password }}"
+      '.*database password.*': "{{ db_sys_password }}"
+      '.*schema password for \[OAS_OPSS\].*': "{{ opss_password }}"
+      '.*schema password for \[OAS_IAU\].*': "{{ iau_password }}"
+      '.*schema password for \[OAS_IAU_APPEND\].*': "{{ iau_append_password }}"
+      '.*schema password for \[OAS_IAU_VIEWER\].*': "{{ iau_viewer_password }}"
+  args:
+    chdir: "{{ fmw_home }}/oracle_common/bin"
