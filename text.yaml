@@ -1,29 +1,14 @@
-- name: Run RCU for OPSS, IAU, IAU_APPEND, IAU_VIEWER components
-  expect:
-    command: >
-      ./rcu -silent -createRepository
-      -connectString {{ db_host }}:{{ db_port_ssl }}:{{ db_service }}
-      -dbUser sys
-      -dbRole sysdba
-      -useSSL
-      -sslArgs
-      javax.net.ssl.trustStore={{ wallet_dir }}/ewallet.p12,
-      javax.net.ssl.trustStoreType=PKCS12,
-      javax.net.ssl.keyStore={{ wallet_dir }}/ewallet.p12,
-      javax.net.ssl.keyStoreType=PKCS12,
-      oracle.net.ssl_server_dn_match=true,
-      oracle.net.authentication_services=TCPS
-      -sslPasswordArgNames javax.net.ssl.keyStorePassword,javax.net.ssl.trustStorePassword
-      -schemaPrefix {{ schema_prefix }}
-      -component OPSS -component IAU -component IAU_APPEND -component IAU_VIEWER
-      -serverDN CN={{ db_host }}
-    responses:
-      '.*javax.net.ssl.keyStorePassword.*': "{{ keystore_password }}"
-      '.*javax.net.ssl.trustStorePassword.*': "{{ truststore_password }}"
-      '.*database password.*': "{{ db_sys_password }}"
-      '.*schema password for \[OAS_OPSS\].*': "{{ opss_password }}"
-      '.*schema password for \[OAS_IAU\].*': "{{ iau_password }}"
-      '.*schema password for \[OAS_IAU_APPEND\].*': "{{ iau_append_password }}"
-      '.*schema password for \[OAS_IAU_VIEWER\].*': "{{ iau_viewer_password }}"
-  args:
-    chdir: "{{ fmw_home }}/oracle_common/bin"
+Install components BIPLATFORM (Non-SSL mode)
+	
+Note: BIPLATFORM component will install only using 1521 port. It does not support TCPS port 2484.
+
+cd $ORACLE_HOME/oracle_common/bin
+
+unset RCU_SSL_MODE
+
+./rcu -silent -createRepository -connectString devdboas1:1521:oasdev -dbUser sys -dbRole sysdba -schemaPrefix oas -component BIPLATFORM
+
+
+Enter the database password(User:sys):
+
+Enter the schema password for [OAS_BIPLATFORM]:
