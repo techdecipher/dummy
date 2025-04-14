@@ -1,1 +1,49 @@
-fg
+✅ 1. Login to Database Server as Oracle user
+bash
+Copy
+Edit
+ssh oracle@<db-host>
+✅ 2. Enable 16K block size in SPFILE (if not done)
+sql
+Copy
+Edit
+ALTER SYSTEM SET db_16k_cache_size=128M SCOPE=SPFILE;
+🔄 Restart DB to apply the change:
+
+bash
+Copy
+Edit
+sqlplus / as sysdba
+SHUTDOWN IMMEDIATE;
+STARTUP;
+✅ 3. Create a new 16K Tablespace (on DB server)
+sql
+Copy
+Edit
+CREATE TABLESPACE BI_16K
+DATAFILE '/u01/app/oracle/oradata/bi_16k01.dbf' SIZE 1G
+BLOCKSIZE 16K
+EXTENT MANAGEMENT LOCAL AUTOALLOCATE
+SEGMENT SPACE MANAGEMENT AUTO;
+✅ 4. Verify Tablespace Block Size
+sql
+Copy
+Edit
+SELECT tablespace_name, block_size FROM dba_tablespaces WHERE tablespace_name = 'BI_16K';
+Should return BI_16K with block size 16384.
+
+✅ 5. Run RCU Tool with BI_16K tablespace
+On App Server where Oracle BI is installed:
+
+bash
+Copy
+Edit
+cd $ORACLE_HOME/oracle_common/bin
+
+./rcu -silent -createRepository \
+-connectString <db-host>:1521:<servicename> \
+-dbUser sys -dbRole sysdba \
+-schemaPrefix OAS \
+-component BIPLATFORM \
+-defaultTablespace BI_16K \
+-tempTablespace TEMP
