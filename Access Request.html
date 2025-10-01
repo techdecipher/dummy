@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Access Request Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+      color: #444;
+    }
+    .required::after {
+      content: " *";
+      color: red;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    input[type="radio"], input[type="checkbox"] {
+      width: auto;
+      margin-right: 10px;
+    }
+    input[readonly] {
+      background-color: #f1f1f1;
+    }
+    .option-group {
+      margin-top: 10px;
+    }
+    .option-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      font-weight: normal;
+      background: #fafafa;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .option-item:hover {
+      background: #f0f8ff;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Toast styling */
+    .toast {
+      visibility: hidden;
+      min-width: 280px;
+      background-color: #28a745;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 12px;
+      position: fixed;
+      z-index: 1;
+      right: 20px;
+      bottom: 20px;
+      font-size: 15px;
+      box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+      opacity: 0;
+      transition: opacity 0.5s, bottom 0.5s;
+    }
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+      bottom: 30px;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px 20px;
+      }
+      input, select, textarea {
+        font-size: 16px;
+      }
+      button {
+        font-size: 18px;
+      }
+    }
+  </style>
+  <script>
+    function setApproverEmail() {
+      const role = document.getElementById("role").value;
+      const approver = document.getElementById("approverEmail");
+      if (role === "dataEngineer") {
+        approver.value = "eng.manager@example.com";
+      } else if (role === "dataAnalyst") {
+        approver.value = "analyst.manager@example.com";
+      } else {
+        approver.value = "";
+      }
+    }
+
+    function validateForm(event) {
+      event.preventDefault();
+
+      const workdayId = document.getElementById("workdayid").value;
+      const justification = document.getElementById("justification").value;
+      const accessOptions = document.querySelectorAll('input[name="access"]:checked');
+
+      // Workday ID must be 6 digits
+      if (!/^\d{6}$/.test(workdayId)) {
+        showToast("⚠️ Workday ID must be a 6-digit number.", "error");
+        return false;
+      }
+
+      // Ensure at least one access option is selected
+      if (accessOptions.length === 0) {
+        showToast("⚠️ Please select at least one access option.", "error");
+        return false;
+      }
+
+      // Business justification min 20 characters
+      if (justification.length < 20) {
+        showToast("⚠️ Business Justification must be at least 20 characters.", "error");
+        return false;
+      }
+
+      // If all validations pass
+      showToast("✅ Your access request has been submitted successfully!", "success");
+      document.querySelector("form").reset();
+      document.getElementById("approverEmail").value = ""; // Reset approver field
+      return true;
+    }
+
+    function showToast(message, type) {
+      const toast = document.getElementById("toast");
+      toast.innerText = message;
+      toast.style.backgroundColor = type === "error" ? "#dc3545" : "#28a745"; // red for error, green for success
+      toast.className = "toast show";
+      setTimeout(() => {
+        toast.className = "toast";
+      }, 7000); // hide after 7s
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Access Request Form</h2>
+    <form onsubmit="validateForm(event)">
+      <label for="fname" class="required">First Name</label>
+      <input type="text" id="fname" name="fname" placeholder="Enter your first name" required>
+
+      <label for="lname" class="required">Last Name</label>
+      <input type="text" id="lname" name="lname" placeholder="Enter your last name" required>
+
+      <label for="email" class="required">Email</label>
+      <input type="email" id="email" name="email" placeholder="example@company.com" required>
+
+      <label for="workdayid" class="required">Workday ID (6-digit Integer)</label>
+      <input type="number" id="workdayid" name="workdayid" placeholder="e.g., 123456" required>
+
+      <label for="role" class="required">Role</label>
+      <select id="role" name="role" onchange="setApproverEmail()" required>
+        <option value="">-- Select --</option>
+        <option value="dataEngineer">Data Engineer</option>
+        <option value="dataAnalyst">Data Analyst</option>
+      </select>
+
+      <label for="approverEmail" class="required">Approver's Email</label>
+      <input type="email" id="approverEmail" name="approverEmail" readonly required placeholder="Auto-filled based on role">
+
+      <label class="required">Select the access you require</label>
+      <div class="option-group">
+        <label class="option-item"><input type="checkbox" name="access" value="Databricks"> Databricks</label>
+        <label class="option-item"><input type="checkbox" name="access" value="GitHub"> GitHub Repos</label>
+        <label class="option-item"><input type="checkbox" name="access" value="S3"> AWS S3</label>
+        <label class="option-item"><input type="checkbox" name="access" value="Denodo"> Denodo</label>
+      </div>
+
+      <label for="justification" class="required">Business Justification</label>
+      <textarea id="justification" name="justification" rows="4" placeholder="Explain why you need this access (min 20 characters)" required></textarea>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+</body>
+</html>
