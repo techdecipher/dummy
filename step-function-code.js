@@ -98,5 +98,15 @@
     gs.log("Custom Action: REST call completed");
 })(inputs, outputs);
 
-
+{
+  "lambda1_input": {
+    "action": "remove"
+  },
+  "lambda3_input": {
+    "tbdp_start": "Analysis",
+    "v_tbdp_date_accomplished": "2025-10-13 11:42:46 AM",
+    "v_tbdp_list_database": "NA",
+    "v_tbdp_environment": "Dev"
+  }
+}
 
