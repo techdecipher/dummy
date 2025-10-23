@@ -8,17 +8,16 @@ import urllib.request, urllib.error
 GITHUB_TOKEN = "88"
 GH_OWNER     = "techdecipher"
 GH_REPO      = "dummy"
-GH_BRANCH    = "dev"              # e.g., "main" or "staging"
+GH_BRANCH    = "dev"    
 
-SOURCE_DIR   = "pnp-role-common"   # folder to copy from (relative to repo root)
-DEST_DIR     = "pnp-role-common03"         # folder to copy to (hardcoded)
+SOURCE_DIR   = "scratch/roles/terragrunt.hcl"  
+DEST_DIR     = "scratch/roles/terragrunt.hcl"  
 
-# terragrunt.hcl that lives inside the folder; we will override it at the destination
 TG_FILE_BASENAME = "terragrunt.hcl"
-
-# desired values to set in the copied terragrunt.hcl
-ROLE_NAME_VALUE          = "tbdpt-persona-role"          # <— change me
-CUSTOM_POLICY_NAME_VALUE = "tbdpt-persona-rw-policy"     # <— change me
+#ROLE_ARN     = "arn:aws:iam::123456789012:role/"
+ROLE_NAME_VALUE  = "arn:aws:iam::123456789012:role/"   
+       
+CUSTOM_POLICY_NAME_VALUE = "tbdpt-persona-rw-policy"    
 
 COMMIT_MSG = f"copy {SOURCE_DIR} -> {DEST_DIR} and update terragrunt.hcl role/policy"
 # ======================================================
@@ -92,6 +91,8 @@ def b64dec_utf8(b64txt: str) -> str:
 
 def lambda_handler(event, context):
     api = f"https://api.github.com/repos/{GH_OWNER}/{GH_REPO}"
+    
+    iam_name = f"{event['prefix']}_{event['environment']}-{event['app_name']}_{event['role']}-{stage}"
 
     # 1) Get branch ref -> commit SHA
     ref = gh("GET", f"{api}/git/ref/heads/{GH_BRANCH}", GITHUB_TOKEN)
@@ -140,7 +141,7 @@ def lambda_handler(event, context):
             # Rare; but handle utf-8 direct
             original_text = blob.get("content", "")
 
-        edited_text = update_terragrunt(original_text, ROLE_NAME_VALUE, CUSTOM_POLICY_NAME_VALUE)
+        edited_text = update_terragrunt(original_text, ROLE_NAME_VALUE+iam_name, CUSTOM_POLICY_NAME_VALUE)
 
         # Create a new blob from edited text
         new_blob = gh("POST", f"{api}/git/blobs", GITHUB_TOKEN, {
