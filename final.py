@@ -8,7 +8,7 @@
 # Terragrunt will copy the Terraform configurations specified by the source parameter, along with any files in the
 # working directory, into a temporary folder, and execute your Terraform commands in that folder.
 terraform {
-  source = "git::git@github.com:Toyota-Motor-North-America/tbdpt-pnpaccess-aws-infra-live.git//custom-modules/security/iam/iam-role?ref=develop"
+  source = "git::git@github.com:tiktok-Motor-North-America/tbdpt-pnpaccess-aws-infra-live.git//custom-modules/security/iam/iam-role?ref=develop"
 }
 
 # Include all settings from the root terragrunt.hcl file
@@ -38,7 +38,7 @@ inputs = {
 # Required variables
 application_id = local.application_id
 application_name = local.application_name
-created_by_email = "jeevan.sagiraju@toyota.com"
+created_by_email = "min@tiktok.com"
 role_name = ""
 description = "TBDPT IAM role to access other services. Created through PNP Automation"
 max_session_duration = 3600
