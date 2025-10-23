@@ -1,237 +1,279 @@
+# lambda_function.py
+import json, base64, re, urllib.request, urllib.error
 
-# ---------------------------------------------------------------------------------------------------------------------
-# TERRAGRUNT CONFIGURATION
-# This is the configuration for Terragrunt, a thin wrapper for Terraform that supports locking and enforces best
-# practices: https://github.com/gruntwork-io/terragrunt
-# ---------------------------------------------------------------------------------------------------------------------
+# ================== HARDCODED CONFIG ==================
+GITHUB_TOKEN     = "ghp_your_pat_here"
+GH_OWNER         = "your-org-or-user"
+GH_REPO          = "your-repo"
+GH_BRANCH        = "dev"                       # e.g., "main" or "dev"
 
-# Terragrunt will copy the Terraform configurations specified by the source parameter, along with any files in the
-# working directory, into a temporary folder, and execute your Terraform commands in that folder.
-terraform {
-  source = "git@github.com:tiktok-Motor-North-America/ace-aws-infra-modules.git//storage/s3/bucket?ref=v31.1.8"
-}
+# Copy template role folder FROM here...
+SOURCE_DIR       = "scratch/roles/template-role"
+# ...TO a folder named after iam_name under this parent:
+DEST_PARENT_DIR  = "scratch/roles"
 
-# Include all settings from the root terragrunt.hcl file
-include {
-  path = find_in_parent_folders()
-}
+# terragrunt.hcl inside the role folder to edit after copy
+TG_FILE_BASENAME = "terragrunt.hcl"
 
-# Local variables
-# Pull required parameters set in the parameter files of this relative path to be used as values.
-locals {
-  global_vars      = read_terragrunt_config(find_in_parent_folders("global.hcl"))
-  region_vars      = read_terragrunt_config(find_in_parent_folders("region.hcl"))
-  environment_vars = read_terragrunt_config(find_in_parent_folders("environment.hcl"))
-  name_prefix      = local.global_vars.locals.name_prefix
-  environment      = local.environment_vars.locals.environment
-  aws_region_cd    = local.region_vars.locals.aws_region_cd
-}
+# The role_name we set will be: ROLE_ARN_PREFIX + iam_name
+ROLE_ARN_PREFIX  = "arn:aws:iam::000000000000:role/"    # <-- put your AWS account
 
-# ---------------------------------------------------------------------------------------------------------------------
-# MODULE PARAMETERS
-# These are the variables we have to pass in to use the module specified in the Terragrunt configuration above
-# ---------------------------------------------------------------------------------------------------------------------
+# The S3 terragrunt.hcl path to patch (absolute path in repo)
+S3_TG_PATH       = "storage/s3/tbdp-pnp-stage-dev/terragrunt.hcl"  # <-- change to your path
 
-inputs = {
-# Required
-# application_id   = ""
-# application_name = ""
-bucket_name      = "tbdp-pnp-stage-dev"
-created_by_email = "jeevan.sagiraju@tiktok.com"
-data_classification = "protected"
-# environment      = ""
+COMMIT_MSG       = "scaffold role & update S3 TG with iam role"
+# ======================================================
 
-# Booleans
-access_logging_enabled = true
-allow_encrypted_uploads_only = false
-allow_ssl_requests_only = false
 
-enable_datadog_monitoring = true
-force_destroy = false
-lambda_notifications_create_permission = false
-sns_notifications_create_policy = false
-sqs_notifications_create_policy = false
-versioning_enabled = true
-s3_replication_enabled = false
-multi_region = false
+# ---------------- GitHub helper ----------------
+def gh(method, url, token, body=None):
+    req = urllib.request.Request(url, method=method)
+    req.add_header("Authorization", f"Bearer {token}")
+    req.add_header("Accept", "application/vnd.github+json")
+    req.add_header("User-Agent", "lambda-gh-folder-copy-hcl-edit")
+    if body is not None:
+        req.add_header("Content-Type", "application/json")
+        req.data = json.dumps(body).encode("utf-8")
+    try:
+        with urllib.request.urlopen(req) as r:
+            t = r.read().decode("utf-8")
+            return json.loads(t) if t else {}
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"GitHub {method} {url} -> {e.code}: {e.read().decode('utf-8','ignore')}")
 
-# Encryption
-allow_override_iam_delegation = true
-cmk_create_key = true
-cmk_key_name = "tbdp-pnp-stage-dev-encrypt-kms-key"
-enable_bucket_key = true
-customer_master_keys = {
-  cmk_administrator_iam_arns = [   
-    "arn:aws:iam::000000000000:role/ATD_TBDP-Admin-NonProd",
-    "arn:aws:iam::000000000000:role/app-admin-role",
-    "arn:aws:iam::000000000000:role/TBDPT_gha_oidc_iam_role",
-    "arn:aws:iam::000000000000:role/tbdp-terraform-infra-deploy-role",
-  ]  
-  cmk_user_iam_arns = [
-  {      
-    name = [
-      "arn:aws:iam::000000000000:role/app-admin-role"
-    ]
-    conditions = []
-  }  
-  ]  
-  cmk_service_principals = [
-  /*{ 
-    name       = "s3.amazonaws.com"
-    actions    = ["kms:*"]
-    conditions = []
-  }*/
-  ]
-  allow_manage_key_permissions_with_iam = false
-}
 
-# Optional 
-accesslogs_bucketname = "tbdp-comp-logs-dev-comp"
-accesslogs_bucketprefix = "s3_access_logs/tbdp-pnp-stage-dev/"
-#cmk_existing_key_arn = null 
-#cors_configuration = null 
- custom_tags = {
-  "Name" = "tbdp-pnp-stage-dev"
-  "ApplicationId" = "BS20170035"
-  "ApplicationName" = "TBDP-COMP"
-  "Description" = "S3 Bucket for all TBDP COMP bucket logs"
-  "Domain" = "customer"
-  "app_name" = "comp"
-  "s3_code_bucket_prefix" = "tbdp-comp-code"
-  "s3_logs_bucket_prefix" = "tbdp-comp-logs"
-} 
-#lambda_notifications = {} 
-lifecycle_configuration_rules = [{
-  enabled = true
-  id      = "TBDP SOX Lifecycle Rules"
+# ---------------- Base64 util ----------------
+def b64dec_utf8(b64txt: str) -> str:
+    return base64.b64decode(b64txt.replace("\n", "").encode()).decode("utf-8")
 
-  abort_incomplete_multipart_upload_days = 7
-  filter_and                             = null
 
-  transition = [{
-    days          = 7
-    storage_class = "INTELLIGENT_TIERING"
-  }]
+# ---------------- Parse payload ----------------
+def parse_payload(event):
+    if isinstance(event, dict) and "body" in event:
+        return json.loads(event["body"] or "{}") if isinstance(event["body"], str) else (event["body"] or {})
+    return event if isinstance(event, dict) else {}
 
-  expiration = {
-    expired_object_delete_marker = true
-  }
 
-  noncurrent_version_transition = [{
-    newer_noncurrent_versions = 1
-    noncurrent_days           = 7
-    storage_class             = "INTELLIGENT_TIERING"
-  }]
+# ---------------- HCL edit helpers (role TG) ----------------
+_role_pat   = re.compile(r'(?m)^\s*role_name\s*=\s*".*?"\s*$')
+_cpol_pat   = re.compile(r'(?m)^\s*custom_policy_name\s*=\s*".*?"\s*$')
+_inputs_pat = re.compile(r'(?s)inputs\s*=\s*{')
 
-  noncurrent_version_expiration = {
-    newer_noncurrent_versions = 1
-    noncurrent_days           = 30
-  }
+def update_role_tg(text: str, role_val: str, cpol_val: str) -> str:
+    out = text
+    found_role = bool(_role_pat.search(out))
+    found_cpol = bool(_cpol_pat.search(out))
+    if found_role:
+        out = _role_pat.sub(f'role_name = "{role_val}"', out)
+    if found_cpol:
+        out = _cpol_pat.sub(f'custom_policy_name = "{cpol_val}"', out)
+    if not (found_role and found_cpol):
+        m = _inputs_pat.search(out)
+        if m:
+            brace_idx = out.find("{", m.end() - 1)
+            if brace_idx != -1:
+                insert_pos = brace_idx + 1
+                add = []
+                if not found_role:
+                    add.append(f'\n  role_name = "{role_val}"')
+                if not found_cpol:
+                    add.append(f'\n  custom_policy_name = "{cpol_val}"')
+                out = out[:insert_pos] + "".join(add) + out[insert_pos:]
+    return out
 
-}]
- 
-#logging_source_policy_documents = [] 
-logging_lifecycle_configuration_rules = [{
-  enabled    = true
-  id         = "log_bucket_lifecycle"
-  filter_and = null
-  # Delete logs after 1 year
-  expiration = {
-    days = 365
-  }
-}]
- 
-#sns_notifications = {}
-source_policy_documents = [jsonencode({
-  "Version": "2012-10-17",
-  "Statement": [
-        {
-            "Sid": "UpdateBucketPolicy",
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::000000000000:root"
-            },
-            "Action": "s3:PutBucketPolicy",
-            "Resource": "arn:aws:s3:::tbdp-pnp-stage-dev"
-        },
-        {
-            "Sid": "ListBucket",
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "arn:aws:iam::000000000000:root"
-            },
-            "Action": "s3:ListBucket",
-            "Resource": "arn:aws:s3:::tbdp-pnp-stage-dev"
-        },
-        {
-            "Sid": "AllowAccessForADGroups",
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": [
-                  "arn:aws:iam::000000000000:role/tbdd-dvpr",
-                  "arn:aws:iam::000000000000:role/tbdd-sox-sap-test"
-                ]
-            },
-            "Action": "s3:*",
-            "Resource": [
-                "arn:aws:s3:::tbdp-pnp-stage-dev",
-                "arn:aws:s3:::tbdp-pnp-stage-dev/*"
-            ]
-        },
-        {
-            "Sid": "DenyBucketAccessExceptWhiteListed",
-            "Effect": "Deny",
-            "Principal": "*",
-            "NotAction": [
-                "s3:Get*",
-                "s3:List*"
-            ],
-            "Resource": "arn:aws:s3:::tbdp-pnp-stage-dev",
-            "Condition": {
-                "StringNotLike": {
-                    "aws:PrincipalArn": [
-                        "arn:aws:iam::000000000000:role/tbdp-terraform-infra-deploy-role",
-                        "arn:aws:iam::000000000000:role/app-admin-role",
-                        "arn:aws:iam::000000000000:role/TBDPT_gha_oidc_iam_role",
-                        "arn:aws:iam::000000000000:role/tbdp-s3-common-replication-role",
-                        "arn:aws:iam::000000000000:role/atd_tbdp-ops_admin_dev-role",
-                        "arn:aws:iam::000000000000:user/dna_tbdp-comp-sox-dev_nonprod_svc",
-                        "arn:aws:iam::000000000000:role/tbdd-comp-databricks-s3-dev",
-                        "arn:aws:iam::000000000000:role/tbdd-comp-svc-role",
-                        "arn:aws:iam::000000000000:role/tbdd-dvpr",
-                        "arn:aws:iam::000000000000:role/tbdd-sox-sap-test"
-                    ]
-                }
-            }
-        },
-        {
-            "Sid": "DenyObjectAccessExceptWhiteListed",
-            "Effect": "Deny",
-            "Principal": "*",
-            "Action": "s3:*",
-            "Resource": "arn:aws:s3:::tbdp-pnp-stage-dev/*",
-            "Condition": {
-                "StringNotLike": {
-                    "aws:PrincipalArn": [
-                        "arn:aws:iam::000000000000:role/tbdp-terraform-infra-deploy-role",
-                        "arn:aws:iam::000000000000:role/app-admin-role",
-                        "arn:aws:iam::000000000000:role/TBDPT_gha_oidc_iam_role",
-                        "arn:aws:iam::000000000000:role/tbdp-s3-common-replication-role",
-                        "arn:aws:iam::000000000000:role/atd_tbdp-ops_admin_dev-role",
-                        "arn:aws:iam::000000000000:user/dna_tbdp-comp-sox-dev_nonprod_svc",
-                        "arn:aws:iam::000000000000:role/tbdd-comp-databricks-s3-dev",
-                        "arn:aws:iam::000000000000:role/tbdd-comp-svc-role",
-                        "arn:aws:iam::000000000000:role/tbdd-dvpr",
-                        "arn:aws:iam::000000000000:role/tbdd-sox-sap-test"
-                    ]
-                }
-            }
-         }
-  ]
-})]
-#sqs_notifications = {} 
-team = "tbdpt"  
-#s3_replication_rules = [] 
-#s3_replica_bucket_arn = ""  
-#cmk_replica_existing_key_arn = null 
-}
+
+# ---------------- Small list rendering helpers ----------------
+def _line_indent_of(s: str, idx: int) -> int:
+    line_start = s.rfind("\n", 0, idx) + 1
+    n = 0
+    while line_start + n < len(s) and s[line_start + n] == " ":
+        n += 1
+    return n
+
+def _extract_quoted_items(inside: str) -> list[str]:
+    return re.findall(r'"([^"]+)"', inside)
+
+def _render_pretty_array(items: list[str], base_indent: int, items_indent: int = 2) -> str:
+    head = " " * base_indent + "["
+    pad  = " " * (base_indent + items_indent)
+    tail = "\n" + " " * base_indent + "]"
+    if not items:
+        return head + tail
+    body = "\n" + ",\n".join(f'{pad}"{v}"' for v in items)
+    return head + body + tail
+
+
+# ---------------- S3 TG patchers ----------------
+def add_role_to_cmk_user_iam_arns_name(hcl_text: str, role_arn: str) -> str:
+    """Append role_arn into cmk_user_iam_arns.name = [ ... ]"""
+    scope_start = hcl_text.find("cmk_user_iam_arns")
+    if scope_start < 0:
+        return hcl_text
+    scoped = hcl_text[scope_start:]
+    m = re.search(r'name\s*=\s*\[', scoped)
+    if not m:
+        return hcl_text
+    anchor_idx = scope_start + m.start()
+    open_br = hcl_text.find("[", anchor_idx)
+    if open_br < 0: return hcl_text
+    close_br = hcl_text.find("]", open_br)
+    if close_br < 0: return hcl_text
+    inside = hcl_text[open_br + 1: close_br]
+    items  = _extract_quoted_items(inside)
+    if role_arn not in items:
+        items.append(role_arn)
+    base_indent = _line_indent_of(hcl_text, open_br + 1)
+    pretty = _render_pretty_array(items, base_indent, 2)
+    return hcl_text[:open_br] + pretty + hcl_text[close_br + 1:]
+
+
+def add_role_to_allow_access_for_adgroups(hcl_text: str, role_arn: str) -> str:
+    """Append role_arn to "AllowAccessForADGroups" -> Principal.AWS array (JSON inside jsonencode)."""
+    sid_block = re.search(r'"Sid"\s*:\s*"AllowAccessForADGroups"[\s\S]*?}', hcl_text)
+    if not sid_block:
+        return hcl_text
+    block_text = sid_block.group(0)
+    m = re.search(r'"AWS"\s*:\s*\[([\s\S]*?)\]', block_text)
+    if not m:
+        return hcl_text
+    start_in_block, end_in_block = m.start(1), m.end(1)
+    inside = block_text[start_in_block:end_in_block]
+    items  = _extract_quoted_items(inside)
+    if role_arn not in items:
+        items.append(role_arn)
+    pretty = _render_pretty_array(items, 0, 2)
+    new_block = block_text[:m.start()] + '"AWS" = ' + pretty + block_text[m.end():]
+    return hcl_text[:sid_block.start()] + new_block + hcl_text[sid_block.end():]
+
+
+def add_role_to_all_principal_arn_lists(hcl_text: str, role_arn: str) -> str:
+    """Append role_arn to every "aws:PrincipalArn" = [ ... ] array (covers both Deny statements)."""
+    pattern = re.compile(r'("aws:PrincipalArn"\s*=\s*)(\[\s*[\s\S]*?\s*\])')
+    def repl(m: re.Match) -> str:
+        header, arr = m.group(1), m.group(2)
+        open_idx = arr.find("["); close_idx = arr.rfind("]")
+        inside = arr[open_idx + 1: close_idx]
+        items  = _extract_quoted_items(inside)
+        if role_arn not in items:
+            items.append(role_arn)
+        pretty = _render_pretty_array(items, 0, 2)
+        return header + pretty
+    return pattern.sub(repl, hcl_text)
+
+
+# ================== MAIN ==================
+def lambda_handler(event, context):
+    p = parse_payload(event)
+    # Required inputs to form iam_name
+    required = ["prefix", "environment", "app_name", "role", "stage"]
+    for k in required:
+        if k not in p or not str(p[k]).strip():
+            return {"statusCode": 400, "body": json.dumps({"error": f"missing key: {k}", "required": required})}
+
+    prefix = p["prefix"].strip()
+    environment = p["environment"].strip()
+    app = p["app_name"].strip()
+    role = p["role"].strip()
+    stage = p["stage"].strip()
+
+    iam_name = f"{prefix}_{environment}-{app}_{role}-{stage}"
+    dest_dir = f"{DEST_PARENT_DIR.strip('/')}/{iam_name}"
+    role_name_value = f"{ROLE_ARN_PREFIX}{iam_name}"
+    custom_policy_name = f"tbdpt-{iam_name}-rw-policy"
+
+    api = f"https://api.github.com/repos/{GH_OWNER}/{GH_REPO}"
+
+    # 1) Branch → commit
+    ref = gh("GET", f"{api}/git/ref/heads/{GH_BRANCH}", GITHUB_TOKEN)
+    base_commit_sha = ref["object"]["sha"]
+
+    # 2) Commit → tree
+    base_commit = gh("GET", f"{api}/git/commits/{base_commit_sha}", GITHUB_TOKEN)
+    base_tree_sha = base_commit["tree"]["sha"]
+
+    # 3) Full tree
+    tree = gh("GET", f"{api}/git/trees/{base_tree_sha}?recursive=1", GITHUB_TOKEN)
+    if "tree" not in tree:
+        return {"statusCode": 404, "body": json.dumps({"error": "repo tree not found"})}
+
+    src_prefix = SOURCE_DIR.strip("/") + "/"
+    dst_prefix = dest_dir.strip("/") + "/"
+    entries = []
+    src_tg_blob_sha = None
+    src_tg_fullpath = f"{SOURCE_DIR.strip('/')}/{TG_FILE_BASENAME}"
+    dst_tg_fullpath = f"{dest_dir.strip('/')}/{TG_FILE_BASENAME}"
+
+    # 4) Collect blobs under SOURCE_DIR
+    for node in tree["tree"]:
+        if node.get("type") == "blob" and node.get("path","").startswith(src_prefix):
+            rel = node["path"][len(src_prefix):]
+            entries.append({
+                "path": f"{dst_prefix}{rel}",
+                "mode": node.get("mode","100644"),
+                "type": "blob",
+                "sha": node["sha"]
+            })
+            if node["path"] == src_tg_fullpath:
+                src_tg_blob_sha = node["sha"]
+
+    if not entries:
+        return {"statusCode": 404, "body": json.dumps({"error": f"No files found under '{SOURCE_DIR}'"})}
+
+    # 5) Edit copied role terragrunt.hcl
+    if src_tg_blob_sha:
+        blob = gh("GET", f"{api}/git/blobs/{src_tg_blob_sha}", GITHUB_TOKEN)
+        original_text = b64dec_utf8(blob["content"]) if blob.get("encoding") == "base64" else blob.get("content","")
+        edited_text = update_role_tg(original_text, role_name_value, custom_policy_name)
+        new_blob = gh("POST", f"{api}/git/blobs", GITHUB_TOKEN, {"content": edited_text, "encoding": "utf-8"})
+        # override copied file with edited blob
+        entries = [e for e in entries if e["path"] != dst_tg_fullpath]
+        entries.append({"path": dst_tg_fullpath, "mode": "100644", "type": "blob", "sha": new_blob["sha"]})
+
+    # 6) Edit S3 terragrunt.hcl with same role ARN
+    try:
+        s3_file = gh("GET", f"{api}/contents/{S3_TG_PATH}?ref={GH_BRANCH}", GITHUB_TOKEN)
+        s3_text = b64dec_utf8(s3_file["content"])
+
+        s3_text = add_role_to_cmk_user_iam_arns_name(s3_text, role_name_value)          # cmk_user_iam_arns.name
+        s3_text = add_role_to_allow_access_for_adgroups(s3_text, role_name_value)       # AllowAccessForADGroups Principal.AWS
+        s3_text = add_role_to_all_principal_arn_lists(s3_text, role_name_value)         # all "aws:PrincipalArn" arrays
+
+        s3_blob = gh("POST", f"{api}/git/blobs", GITHUB_TOKEN, {"content": s3_text, "encoding": "utf-8"})
+        entries.append({"path": S3_TG_PATH, "mode": "100644", "type": "blob", "sha": s3_blob["sha"]})
+    except Exception as e:
+        print(f"[S3 TG edit skipped] {e}")
+
+    # 7) Create tree
+    new_tree = gh("POST", f"{api}/git/trees", GITHUB_TOKEN, {"base_tree": base_tree_sha, "tree": entries})
+    new_tree_sha = new_tree["sha"]
+
+    # 8) Commit
+    msg = f"{COMMIT_MSG} → {iam_name}"
+    new_commit = gh("POST", f"{api}/git/commits", GITHUB_TOKEN, {
+        "message": msg,
+        "tree": new_tree_sha,
+        "parents": [base_commit_sha],
+        "author": {"name":"Lambda Bot","email":"lambda@example.com"},
+        "committer":{"name":"Lambda Bot","email":"lambda@example.com"}
+    })
+    new_commit_sha = new_commit["sha"]
+
+    # 9) Update ref
+    gh("PATCH", f"{api}/git/refs/heads/{GH_BRANCH}", GITHUB_TOKEN, {"sha": new_commit_sha, "force": False})
+
+    return {
+        "statusCode": 200,
+        "body": json.dumps({
+            "iam_name": iam_name,
+            "copied_from": SOURCE_DIR,
+            "copied_to": dest_dir,
+            "terragrunt_role_modified": bool(src_tg_blob_sha),
+            "s3_tg_modified": True,
+            "role_name": role_name_value,
+            "custom_policy_name": custom_policy_name,
+            "dest_role_tg_path": dst_tg_fullpath,
+            "s3_tg_path": S3_TG_PATH,
+            "commit_sha": new_commit_sha,
+            "message": msg
+        })
+    }
