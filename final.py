@@ -1,29 +1,22 @@
 # lambda_function.py
-import json
-import base64
-import re
-import urllib.request, urllib.error
+import json, base64, re, urllib.request, urllib.error
 
-# ================== HARDCODED CONFIG ==================
-GITHUB_TOKEN = "88"
-GH_OWNER     = "techdecipher"
-GH_REPO      = "dummy"
-GH_BRANCH    = "dev"    
+# ===== HARDCODED CONFIG =====
+GITHUB_TOKEN     = "ghp_your_pat_here"
+GH_OWNER         = "techdecipher"
+GH_REPO          = "dummy"
+GH_BRANCH        = "dev"
 
-SOURCE_DIR   = "scratch/roles/terragrunt.hcl"  
-DEST_DIR     = "scratch/roles/terragrunt.hcl"  
+SOURCE_DIR       = "scratch/roles/template-role"   # folder to copy FROM
+DEST_PARENT_DIR  = "scratch/roles"                 # parent folder; final dest = DEST_PARENT_DIR/<iam_name>
 
 TG_FILE_BASENAME = "terragrunt.hcl"
-#ROLE_ARN     = "arn:aws:iam::123456789012:role/"
-ROLE_NAME_VALUE  = "arn:aws:iam::123456789012:role/"   
-       
-CUSTOM_POLICY_NAME_VALUE = "tbdpt-persona-rw-policy"    
+ROLE_ARN_PREFIX  = "arn:aws:iam::123456789012:role/"  # role_name becomes this + iam_name
 
-COMMIT_MSG = f"copy {SOURCE_DIR} -> {DEST_DIR} and update terragrunt.hcl role/policy"
-# ======================================================
+COMMIT_MSG       = "scaffold role folder and update terragrunt.hcl"
+# ===========================
 
-
-# ------------- GitHub helper -------------
+# --- GitHub helper ---
 def gh(method, url, token, body=None):
     req = urllib.request.Request(url, method=method)
     req.add_header("Authorization", f"Bearer {token}")
@@ -34,94 +27,91 @@ def gh(method, url, token, body=None):
         req.data = json.dumps(body).encode("utf-8")
     try:
         with urllib.request.urlopen(req) as r:
-            txt = r.read().decode("utf-8")
-            return json.loads(txt) if txt else {}
+            t = r.read().decode("utf-8")
+            return json.loads(t) if t else {}
     except urllib.error.HTTPError as e:
-        detail = e.read().decode("utf-8", errors="ignore")
-        raise RuntimeError(f"GitHub {method} {url} -> {e.code}: {detail}")
+        raise RuntimeError(f"GitHub {method} {url} -> {e.code}: {e.read().decode('utf-8','ignore')}")
 
-
-# ------------- HCL edit helpers -------------
+# --- HCL edit helpers ---
 _role_pat   = re.compile(r'(?m)^\s*role_name\s*=\s*".*?"\s*$')
 _cpol_pat   = re.compile(r'(?m)^\s*custom_policy_name\s*=\s*".*?"\s*$')
 _inputs_pat = re.compile(r'(?s)inputs\s*=\s*{')
 
 def update_terragrunt(text: str, role_val: str, cpol_val: str) -> str:
-    """Update role_name and custom_policy_name in the inputs block.
-       If keys are missing, insert them inside the inputs block."""
-    updated = text
-
-    # Replace if present
-    found_role = bool(_role_pat.search(updated))
-    found_cpol = bool(_cpol_pat.search(updated))
-
+    out = text
+    found_role = bool(_role_pat.search(out))
+    found_cpol = bool(_cpol_pat.search(out))
     if found_role:
-        updated = _role_pat.sub(f'role_name = "{role_val}"', updated)
+        out = _role_pat.sub(f'role_name = "{role_val}"', out)
     if found_cpol:
-        updated = _cpol_pat.sub(f'custom_policy_name = "{cpol_val}"', updated)
-
-    # If either is missing, insert into inputs block
+        out = _cpol_pat.sub(f'custom_policy_name = "{cpol_val}"', out)
     if not (found_role and found_cpol):
-        m = _inputs_pat.search(updated)
+        m = _inputs_pat.search(out)
         if m:
-            # find insert position right after the opening "{"
-            # locate the "{" after "inputs ="
-            brace_idx = updated.find("{", m.end() - 1)
+            brace_idx = out.find("{", m.end() - 1)
             if brace_idx != -1:
                 insert_pos = brace_idx + 1
-                # prepare lines respecting indentation
-                # determine indentation by peeking next line
-                # fallback to 2 spaces
-                indent = "  "
-                # Build what to insert (only missing ones)
-                lines_to_add = []
+                lines = []
                 if not found_role:
-                    lines_to_add.append(f'\n{indent}role_name = "{role_val}"')
+                    lines.append(f'\n  role_name = "{role_val}"')
                 if not found_cpol:
-                    lines_to_add.append(f'\n{indent}custom_policy_name = "{cpol_val}"')
-                updated = updated[:insert_pos] + "".join(lines_to_add) + updated[insert_pos:]
-            # if inputs block not well-formed, we silently skip; we already did replacements if present
-    return updated
+                    lines.append(f'\n  custom_policy_name = "{cpol_val}"')
+                out = out[:insert_pos] + "".join(lines) + out[insert_pos:]
+    return out
 
-
-# ------------- Base64 utils -------------
+# --- Base64 util ---
 def b64dec_utf8(b64txt: str) -> str:
-    return base64.b64decode(b64txt.replace("\n", "").encode()).decode("utf-8")
+    return base64.b64decode(b64txt.replace("\n","").encode()).decode("utf-8")
 
+# --- Safe payload parse ---
+def parse_payload(event):
+    if isinstance(event, dict) and "body" in event:
+        return json.loads(event["body"] or "{}") if isinstance(event["body"], str) else (event["body"] or {})
+    return event if isinstance(event, dict) else {}
 
 def lambda_handler(event, context):
-    api = f"https://api.github.com/repos/{GH_OWNER}/{GH_REPO}"
-    
-    iam_name = f"{event['prefix']}_{event['environment']}-{event['app_name']}_{event['role']}-{stage}"
+    p = parse_payload(event)
+    # Build iam_name from event
+    try:
+        prefix = p["prefix"]; environment = p["environment"]; app = p["app_name"]
+        role = p["role"]; stage = p["stage"]
+    except KeyError as k:
+        return {"statusCode": 400, "body": json.dumps({"error": f"missing key: {k.args[0]}", "required": ["prefix","environment","app_name","role","stage"]})}
 
-    # 1) Get branch ref -> commit SHA
+    iam_name = f"{prefix}_{environment}-{app}_{role}-{stage}"
+    dest_dir = f"{DEST_PARENT_DIR.strip('/')}/{iam_name}"
+    policy_name = f"tbdpt-{iam_name}-rw-policy"
+    role_name_value = f"{ROLE_ARN_PREFIX}{iam_name}"
+
+    api = f"https://api.github.com/repos/{GH_OWNER}/{GH_REPO}"
+
+    # 1) Get branch → commit
     ref = gh("GET", f"{api}/git/ref/heads/{GH_BRANCH}", GITHUB_TOKEN)
     base_commit_sha = ref["object"]["sha"]
 
-    # 2) Get base commit -> tree SHA
+    # 2) Commit → tree
     base_commit = gh("GET", f"{api}/git/commits/{base_commit_sha}", GITHUB_TOKEN)
     base_tree_sha = base_commit["tree"]["sha"]
 
-    # 3) Get recursive tree
+    # 3) Full tree
     tree = gh("GET", f"{api}/git/trees/{base_tree_sha}?recursive=1", GITHUB_TOKEN)
     if "tree" not in tree:
-        return {"statusCode": 404, "body": json.dumps({"error": "Repo tree not found"})}
+        return {"statusCode": 404, "body": json.dumps({"error": "repo tree not found"})}
 
     src_prefix = SOURCE_DIR.strip("/") + "/"
-    dst_prefix = DEST_DIR.strip("/") + "/"
+    dst_prefix = dest_dir.strip("/") + "/"
     entries = []
     src_tg_blob_sha = None
     src_tg_fullpath = f"{SOURCE_DIR.strip('/')}/{TG_FILE_BASENAME}"
-    dst_tg_fullpath = f"{DEST_DIR.strip('/')}/{TG_FILE_BASENAME}"
+    dst_tg_fullpath = f"{dest_dir.strip('/')}/{TG_FILE_BASENAME}"
 
-    # 4) Collect all file blobs under SOURCE_DIR; detect terragrunt.hcl blob SHA
+    # 4) Collect blobs under SOURCE_DIR
     for node in tree["tree"]:
-        if node.get("type") == "blob" and node.get("path", "").startswith(src_prefix):
+        if node.get("type") == "blob" and node.get("path","").startswith(src_prefix):
             rel = node["path"][len(src_prefix):]
-            new_path = f"{dst_prefix}{rel}"
             entries.append({
-                "path": new_path,
-                "mode": node.get("mode", "100644"),
+                "path": f"{dst_prefix}{rel}",
+                "mode": node.get("mode","100644"),
                 "type": "blob",
                 "sha": node["sha"]
             })
@@ -131,66 +121,43 @@ def lambda_handler(event, context):
     if not entries:
         return {"statusCode": 404, "body": json.dumps({"error": f"No files found under '{SOURCE_DIR}'"})}
 
-    # 5) If terragrunt.hcl existed in source, fetch -> modify -> create new blob -> override destination path
+    # 5) Edit copied terragrunt.hcl
     if src_tg_blob_sha:
-        # Get blob content (base64) from Git Data API (not Contents API)
         blob = gh("GET", f"{api}/git/blobs/{src_tg_blob_sha}", GITHUB_TOKEN)
-        if blob.get("encoding") == "base64":
-            original_text = b64dec_utf8(blob.get("content", ""))
-        else:
-            # Rare; but handle utf-8 direct
-            original_text = blob.get("content", "")
-
-        edited_text = update_terragrunt(original_text, ROLE_NAME_VALUE+iam_name, CUSTOM_POLICY_NAME_VALUE)
-
-        # Create a new blob from edited text
-        new_blob = gh("POST", f"{api}/git/blobs", GITHUB_TOKEN, {
-            "content": edited_text,
-            "encoding": "utf-8"
-        })
-        # Remove any earlier entry for the same destination path, then add our edited one
+        original_text = b64dec_utf8(blob["content"]) if blob.get("encoding") == "base64" else blob.get("content","")
+        edited_text = update_terragrunt(original_text, role_name_value, policy_name)
+        new_blob = gh("POST", f"{api}/git/blobs", GITHUB_TOKEN, {"content": edited_text, "encoding": "utf-8"})
+        # override the file at dest with edited blob
         entries = [e for e in entries if e["path"] != dst_tg_fullpath]
-        entries.append({
-            "path": dst_tg_fullpath,
-            "mode": "100644",
-            "type": "blob",
-            "sha": new_blob["sha"]
-        })
-    # If the source didn’t have terragrunt.hcl, we just keep the copy as-is (nothing to edit).
+        entries.append({"path": dst_tg_fullpath, "mode": "100644", "type": "blob", "sha": new_blob["sha"]})
 
-    # 6) Create new tree using base_tree + our entries
-    new_tree = gh("POST", f"{api}/git/trees", GITHUB_TOKEN, {
-        "base_tree": base_tree_sha,
-        "tree": entries
-    })
+    # 6) Create tree
+    new_tree = gh("POST", f"{api}/git/trees", GITHUB_TOKEN, {"base_tree": base_tree_sha, "tree": entries})
     new_tree_sha = new_tree["sha"]
 
-    # 7) Create commit
+    # 7) Commit
+    msg = f"{COMMIT_MSG} → {iam_name}"
     new_commit = gh("POST", f"{api}/git/commits", GITHUB_TOKEN, {
-        "message": COMMIT_MSG,
-        "tree": new_tree_sha,
-        "parents": [base_commit_sha],
-        "author":   {"name": "Lambda Bot", "email": "lambda@example.com"},
-        "committer":{"name": "Lambda Bot", "email": "lambda@example.com"}
+        "message": msg, "tree": new_tree_sha, "parents": [base_commit_sha],
+        "author": {"name":"Lambda Bot","email":"lambda@example.com"},
+        "committer":{"name":"Lambda Bot","email":"lambda@example.com"}
     })
     new_commit_sha = new_commit["sha"]
 
-    # 8) Update branch
-    gh("PATCH", f"{api}/git/refs/heads/{GH_BRANCH}", GITHUB_TOKEN, {
-        "sha": new_commit_sha,
-        "force": False
-    })
+    # 8) Update ref
+    gh("PATCH", f"{api}/git/refs/heads/{GH_BRANCH}", GITHUB_TOKEN, {"sha": new_commit_sha, "force": False})
 
     return {
         "statusCode": 200,
         "body": json.dumps({
+            "iam_name": iam_name,
             "copied_from": SOURCE_DIR,
-            "copied_to": DEST_DIR,
+            "copied_to": dest_dir,
             "terragrunt_modified": bool(src_tg_blob_sha),
-            "role_name": ROLE_NAME_VALUE,
-            "custom_policy_name": CUSTOM_POLICY_NAME_VALUE,
+            "role_name": role_name_value,
+            "custom_policy_name": policy_name,
             "dest_terragrunt_path": dst_tg_fullpath,
             "commit_sha": new_commit_sha,
-            "message": COMMIT_MSG
+            "message": msg
         })
     }
