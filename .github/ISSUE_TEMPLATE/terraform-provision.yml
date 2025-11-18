@@ -1,0 +1,35 @@
+name: "Terraform Provision Request"
+description: "Trigger Terraform/Terragrunt workflow"
+labels: ["terraform-provision"]
+body:
+  - type: input
+    id: environment
+    attributes:
+      label: "Environment"
+      placeholder: "dev / qa / prod"
+      required: true
+
+  - type: input
+    id: git_branch
+    attributes:
+      label: "Git Branch"
+      placeholder: "feature/login-api"
+      required: true
+
+  - type: dropdown
+    id: wait_for_approval
+    attributes:
+      label: "Wait for Approval"
+      options:
+        - "true"
+        - "false"
+      required: true
+
+  - type: dropdown
+    id: terraform_command
+    attributes:
+      label: "Terraform Command"
+      options:
+        - terragrunt
+        - terraform
+      required: true
