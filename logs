@@ -1,49 +1,62 @@
-✅ 1. Login to Database Server as Oracle user
-bash
-Copy
-Edit
-ssh oracle@<db-host>
-✅ 2. Enable 16K block size in SPFILE (if not done)
-sql
-Copy
-Edit
-ALTER SYSTEM SET db_16k_cache_size=128M SCOPE=SPFILE;
-🔄 Restart DB to apply the change:
+ServiceNow Flow
 
-bash
-Copy
-Edit
-sqlplus / as sysdba
-SHUTDOWN IMMEDIATE;
-STARTUP;
-✅ 3. Create a new 16K Tablespace (on DB server)
-sql
-Copy
-Edit
-CREATE TABLESPACE BI_16K
-DATAFILE '/u01/app/oracle/oradata/bi_16k01.dbf' SIZE 1G
-BLOCKSIZE 16K
-EXTENT MANAGEMENT LOCAL AUTOALLOCATE
-SEGMENT SPACE MANAGEMENT AUTO;
-✅ 4. Verify Tablespace Block Size
-sql
-Copy
-Edit
-SELECT tablespace_name, block_size FROM dba_tablespaces WHERE tablespace_name = 'BI_16K';
-Should return BI_16K with block size 16384.
 
-✅ 5. Run RCU Tool with BI_16K tablespace
-On App Server where Oracle BI is installed:
+---
 
-bash
-Copy
-Edit
-cd $ORACLE_HOME/oracle_common/bin
+UI Side
 
-./rcu -silent -createRepository \
--connectString <db-host>:1521:<servicename> \
--dbUser sys -dbRole sysdba \
--schemaPrefix OAS \
--component BIPLATFORM \
--defaultTablespace BI_16K \
--tempTablespace TEMP
+User fills the onboarding form on the portal → Redux dispatches an action → root-saga.ts catches that action and decides which backend API to call based on the user submission.
+
+These saga functions internally call APIs defined in the UI api-store.
+
+
+File:
+portal-ui/src/api-store/root-saga.ts
+(Along with other saga files in pages/.../saga.ts)
+
+
+---
+
+Backend Side
+
+1. API Router receives the request
+
+Once the UI calls an endpoint (e.g., /serviceNow/add_user_to_pod), the main FastAPI router receives it first.
+
+
+File:
+portal-backend/src/web/api/router.py
+
+
+---
+
+2. Main router forwards to module-specific router
+
+Based on the URL prefix (/serviceNow in this example), the main router hands the request to the appropriate feature router (ServiceNow router).
+
+
+File:
+portal-backend/src/web/api/servicenow/servicenow_user_routes.py
+(or servicenow_pod_routes.py depending on feature)
+
+
+---
+
+3. Feature router calls the appropriate backend service
+
+Inside servicenow_user_routes.py, each endpoint (e.g., @router.post("/add_user_to_pod")) calls a corresponding method in the ServiceNow service class.
+
+This service contains the business logic for creating/updating SNOW tickets, retrieving sys_id, etc.
+
+
+File:
+portal-backend/src/services/servicenow/servicenow_user_service.py
+(Or servicenow_pod_tasks.py depending on operation)
+
+
+---
+
+4. Service calls task/helper layer to talk to ServiceNow API
+
+The service layer then uses ServiceNow task modules to send actual REST API calls to SNOW.
+
